@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { SocketProvider } from './context/SocketContext'
 import { ConfigProvider } from './context/ConfigContext'
-import MainLayout from './components/MainLayout'
+import MainLayout from './layouts/MainLayout'
 import './styles/index.css'
 import App from './App.jsx'
 

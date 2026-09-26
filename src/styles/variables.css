@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Montserrat:wght@600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
+
+:root {
+  /* Color Palette - Cinematic Dark Fantasy / Pirate */
+  --bg-void: #030710;
+  --bg-dark: #070c17;
+  --bg-surface: #0c1524;
+  --bg-surface-elevated: #111d33;
+  --bg-card: rgba(12, 21, 36, 0.82);
+  --bg-card-hover: rgba(18, 31, 54, 0.92);
+  --bg-card-solid: #0e182a;
+  
+  /* Antique & Radiant Gold */
+  --gold-primary: #f59e0b;
+  --gold-light: #fbbf24;
+  --gold-vivid: #fcd34d;
+  --gold-dark: #b45309;
+  --gold-gradient: linear-gradient(135deg, #fbbf24 0%, #d97706 50%, #92400e 100%);
+  --gold-gradient-shine: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
+  --gold-border: rgba(245, 158, 11, 0.35);
+  --gold-border-bright: rgba(251, 191, 36, 0.7);
+  --gold-glow: 0 0 25px rgba(245, 158, 11, 0.35);
+
+  /* Mystic Sea Teal / Cyan */
+  --cyan-primary: #00e5ff;
+  --cyan-dark: #0284c7;
+  --cyan-gradient: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  --cyan-border: rgba(0, 229, 255, 0.3);
+  --cyan-glow: 0 0 25px rgba(0, 229, 255, 0.35);
+
+  /* Battle Ember / Crimson */
+  --crimson-primary: #ff3366;
+  --crimson-hover: #e11d48;
+  --crimson-gradient: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
+  --crimson-border: rgba(255, 51, 102, 0.35);
+  --crimson-glow: 0 0 25px rgba(255, 51, 102, 0.4);
+
+  /* Emerald / Bounty */
+  --emerald-primary: #10b981;
+  --emerald-dark: #047857;
+
+  /* Typography Colors */
+  --text-white: #f8fafc;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-subtle: #64748b;
+  --text-gold: #fde047;
+  --text-cyan: #38bdf8;
+
+  /* Borders & Dividers */
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-glass-light: rgba(255, 255, 255, 0.15);
+  --border-gold-subtle: rgba(245, 158, 11, 0.22);
+
+  /* Shadows */
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.75);
+  --shadow-gold: 0 10px 30px rgba(245, 158, 11, 0.22);
+  --shadow-card: 0 12px 36px -4px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  /* Fonts - Full Vietnamese Diacritics Support */
+  --font-heading: 'Montserrat', 'Playfair Display', 'Be Vietnam Pro', system-ui, sans-serif;
+  --font-body: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+  --font-display: 'Barlow Condensed', 'Montserrat', sans-serif;
+
+  /* Layout & Spacing */
+  --header-height: 76px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 0.18s ease;
+  --transition-normal: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Backward Compatibility Variables for Existing Logic */
+  --primary: var(--gold-primary);
+  --primary-hover: var(--gold-light);
+  --secondary: var(--crimson-primary);
+  --secondary-hover: var(--crimson-hover);
+  --glass-bg: var(--bg-card);
+  --glass-border: var(--border-glass);
+}

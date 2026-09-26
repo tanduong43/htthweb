@@ -102,6 +102,7 @@ export default function AdminAuction() {
       category: item.category,
       template_id: item.id,
       color: item.defaultColor || 0,
+      icon: item.icon || -1,
     }));
     setSearchResults([]);
     setSearchKeyword('');
