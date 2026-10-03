@@ -3255,11 +3255,60 @@ button {
 .chronicle-body-content {
   font-size: 16px;
   line-height: 1.8;
-  color: #cbd5e1;
+  color: #f8fafc;
 }
 
 .chronicle-body-content p {
   margin-bottom: 18px;
+  color: #f1f5f9;
+}
+
+.chronicle-body-content strong {
+  color: #ffffff;
+}
+
+.chronicle-body-content ul,
+.chronicle-body-content ol {
+  margin: 12px 0 18px 24px;
+  color: #f1f5f9;
+}
+
+.chronicle-body-content li {
+  margin-bottom: 8px;
+  line-height: 1.7;
+}
+
+.chronicle-body-content table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 20px 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background: rgba(10, 18, 32, 0.75) !important;
+}
+
+.chronicle-body-content th {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
+  color: #ffffff !important;
+  padding: 12px 14px;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.chronicle-body-content td {
+  padding: 12px 14px;
+  color: #f8fafc !important;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  line-height: 1.6;
+}
+
+.chronicle-body-content tr:hover td {
+  background: rgba(244, 63, 94, 0.15) !important;
 }
 
 .chronicle-body-content img {
