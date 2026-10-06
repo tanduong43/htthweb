@@ -35,10 +35,13 @@ export default function AdminDashboard() {
     if (status === 0 && txn && txn.real_amount > 0 && txn.real_amount !== txn.amount) {
       return { text: '⚠️ Chờ duyệt (Sai tiền)', color: '#fa8c16', bg: 'rgba(250,140,22,0.1)' };
     }
+    if (txn && txn.description && txn.description.includes('Từ chối')) {
+      return { text: 'Bị từ chối', color: '#f5222d', bg: 'rgba(245,34,45,0.1)' };
+    }
     switch (status) {
       case 0: return { text: 'Chờ duyệt', color: '#faad14', bg: 'rgba(250,173,20,0.1)' };
       case 1: return { text: 'Thành công', color: '#52c41a', bg: 'rgba(82,196,26,0.1)' };
-      case 2: return { text: 'Đã duyệt (Sai m.giá)', color: '#1890ff', bg: 'rgba(24,144,255,0.1)' };
+      case 2: return { text: 'Sai mệnh giá', color: '#fa8c16', bg: 'rgba(250,140,22,0.1)' };
       case 3: return { text: 'Thất bại', color: '#f5222d', bg: 'rgba(245,34,45,0.1)' };
       case 4: return { text: 'Đã hủy', color: '#8c8c8c', bg: 'rgba(140,140,140,0.1)' };
       default: return { text: 'Không rõ', color: '#888', bg: 'rgba(255,255,255,0.05)' };

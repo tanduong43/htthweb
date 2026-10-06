@@ -92,83 +92,62 @@ function AdminCoin() {
     }
   };
 
-  const handleResetTichNap = async () => {
-    const confirmReset = window.confirm(
-      "⚠️ CẢNH BÁO CỰC KỲ QUAN TRỌNG ⚠️\n\n" +
-      "Hành động này sẽ đặt lại điểm Tích Lũy Nạp của TOÀN BỘ tài khoản về 0 và xóa lịch sử mốc nhận quà.\n" +
-      "Bạn có chắc chắn muốn thực hiện reset không? Thao tác này không thể hoàn tác!"
-    );
-    if (!confirmReset) return;
+  // State quản lý Box thông báo xác nhận & kết quả Reset
+  const [resetModal, setResetModal] = useState({
+    isOpen: false,
+    title: '',
+    icon: '',
+    color: '',
+    warningText: '',
+    actionEndpoint: '',
+    loading: false,
+    result: null // null | { success: boolean, message: string }
+  });
 
-    try {
-      const res = await api.post('admin/reset_tichnap');
-      showMessage(res.data.success ? 'success' : 'error', res.data.message);
-    } catch {
-      showMessage('error', 'Lỗi kết nối máy chủ khi reset nạp!');
-    }
+  const handleOpenResetModal = (title, icon, color, warningText, actionEndpoint) => {
+    setResetModal({
+      isOpen: true,
+      title,
+      icon,
+      color,
+      warningText,
+      actionEndpoint,
+      loading: false,
+      result: null
+    });
   };
 
-  const handleResetTichTieu = async () => {
-    const confirmReset = window.confirm(
-      "⚠️ CẢNH BÁO CỰC KỲ QUAN TRỌNG ⚠️\n\n" +
-      "Hành động này sẽ đặt lại điểm Tích Tiêu Ruby của TOÀN BỘ nhân vật về 0 và xóa lịch sử mốc nhận quà.\n" +
-      "Bạn có chắc chắn muốn thực hiện reset không? Thao tác này không thể hoàn tác!"
-    );
-    if (!confirmReset) return;
-
-    try {
-      const res = await api.post('admin/reset_tichtieu');
-      showMessage(res.data.success ? 'success' : 'error', res.data.message);
-    } catch {
-      showMessage('error', 'Lỗi kết nối máy chủ khi reset tiêu!');
-    }
+  const handleCloseResetModal = () => {
+    if (resetModal.loading) return;
+    setResetModal(prev => ({ ...prev, isOpen: false, result: null }));
   };
 
-  const handleResetHangDong = async () => {
-    const confirmReset = window.confirm(
-      "⚠️ CẢNH BÁO CỰC KỲ QUAN TRỌNG ⚠️\n\n" +
-      "Hành động này sẽ đặt lại tiến trình Hang Động của TOÀN BỘ nhân vật về 0.\n" +
-      "Bạn có chắc chắn muốn thực hiện reset không? Thao tác này không thể hoàn tác!"
-    );
-    if (!confirmReset) return;
+  const handleConfirmReset = async () => {
+    if (!resetModal.actionEndpoint || resetModal.loading) return;
+    setResetModal(prev => ({ ...prev, loading: true }));
 
     try {
-      const res = await api.post('admin/reset_hangdong');
+      const res = await api.post(resetModal.actionEndpoint);
       showMessage(res.data.success ? 'success' : 'error', res.data.message);
-    } catch {
-      showMessage('error', 'Lỗi kết nối máy chủ khi reset hang động!');
-    }
-  };
-
-  const handleResetPvp = async () => {
-    const confirmReset = window.confirm(
-      "⚠️ CẢNH BÁO CỰC KỲ QUAN TRỌNG ⚠️\n\n" +
-      "Hành động này sẽ đặt lại Điểm PVP của TOÀN BỘ nhân vật về 0 (giữ nguyên chỉ số Thắng/Thua).\n" +
-      "Bạn có chắc chắn muốn thực hiện reset không? Thao tác này không thể hoàn tác!"
-    );
-    if (!confirmReset) return;
-
-    try {
-      const res = await api.post('admin/reset_pvp');
-      showMessage(res.data.success ? 'success' : 'error', res.data.message);
-    } catch {
-      showMessage('error', 'Lỗi kết nối máy chủ khi reset PVP!');
-    }
-  };
-
-  const handleResetTruyNa = async () => {
-    const confirmReset = window.confirm(
-      "⚠️ CẢNH BÁO CỰC KỲ QUAN TRỌNG ⚠️\n\n" +
-      "Hành động này sẽ đặt lại Điểm Truy Nã (Bounty / Tiền Thưởng Hải Tặc) của TOÀN BỘ nhân vật về 0.\n" +
-      "Bạn có chắc chắn muốn thực hiện reset không? Thao tác này không thể hoàn tác!"
-    );
-    if (!confirmReset) return;
-
-    try {
-      const res = await api.post('admin/reset_truyna');
-      showMessage(res.data.success ? 'success' : 'error', res.data.message);
-    } catch {
-      showMessage('error', 'Lỗi kết nối máy chủ khi reset điểm truy nã!');
+      setResetModal(prev => ({
+        ...prev,
+        loading: false,
+        result: {
+          success: !!res.data.success,
+          message: res.data.message || (res.data.success ? 'Thực hiện reset thành công!' : 'Thực hiện reset thất bại!')
+        }
+      }));
+    } catch (err) {
+      const errMsg = err?.response?.data?.message || err?.message || 'Lỗi kết nối máy chủ khi thực hiện reset!';
+      showMessage('error', errMsg);
+      setResetModal(prev => ({
+        ...prev,
+        loading: false,
+        result: {
+          success: false,
+          message: errMsg
+        }
+      }));
     }
   };
 
@@ -251,7 +230,13 @@ function AdminCoin() {
 
         <button 
           type="button" 
-          onClick={handleResetTichNap}
+          onClick={() => handleOpenResetModal(
+            'RESET TÍCH LŨY NẠP',
+            '🔄',
+            '#faad14',
+            'Đặt lại điểm tích lũy nạp của TẤT CẢ tài khoản về 0 và xóa trạng thái nhận quà mốc nạp.',
+            'admin/reset_tichnap'
+          )}
           style={{
             ...styles.btnSubmit,
             backgroundColor: '#faad14',
@@ -278,7 +263,13 @@ function AdminCoin() {
 
         <button 
           type="button" 
-          onClick={handleResetTichTieu}
+          onClick={() => handleOpenResetModal(
+            'RESET TÍCH TIÊU RUBY',
+            '🔄',
+            '#13c2c2',
+            'Đặt lại điểm tích tiêu ruby của TẤT CẢ nhân vật về 0 và xóa trạng thái nhận quà mốc tiêu.',
+            'admin/reset_tichtieu'
+          )}
           style={{
             ...styles.btnSubmit,
             backgroundColor: '#13c2c2',
@@ -305,7 +296,13 @@ function AdminCoin() {
 
         <button 
           type="button" 
-          onClick={handleResetHangDong}
+          onClick={() => handleOpenResetModal(
+            'RESET TIẾN TRÌNH HANG ĐỘNG',
+            '🔄',
+            '#9254de',
+            'Đặt lại tiến trình tầng Hang Động của TẤT CẢ nhân vật về 0.',
+            'admin/reset_hangdong'
+          )}
           style={{
             ...styles.btnSubmit,
             backgroundColor: '#9254de',
@@ -332,7 +329,13 @@ function AdminCoin() {
 
         <button 
           type="button" 
-          onClick={handleResetPvp}
+          onClick={() => handleOpenResetModal(
+            'RESET ĐIỂM PVP',
+            '⚔️',
+            '#fa541c',
+            'Đặt lại điểm PVP của TẤT CẢ nhân vật về 0 (giữ nguyên số trận thắng/thua).',
+            'admin/reset_pvp'
+          )}
           style={{
             ...styles.btnSubmit,
             backgroundColor: '#fa541c',
@@ -359,7 +362,13 @@ function AdminCoin() {
 
         <button 
           type="button" 
-          onClick={handleResetTruyNa}
+          onClick={() => handleOpenResetModal(
+            'RESET ĐIỂM TRUY NÃ',
+            '📜',
+            '#eb2f96',
+            'Đặt lại điểm truy nã (bounty / tiền thưởng hải tặc) của TẤT CẢ nhân vật về 0.',
+            'admin/reset_truyna'
+          )}
           style={{
             ...styles.btnSubmit,
             backgroundColor: '#eb2f96',
@@ -371,6 +380,245 @@ function AdminCoin() {
           Xác Nhận Reset Toàn Bộ
         </button>
       </div>
+
+      {/* Card Reset Top Pháo Hoa */}
+      <div style={{ ...styles.formContainer, margin: '0', flex: '1 1 300px', maxWidth: '420px' }}>
+        <h3 style={{ ...styles.title, color: '#ff4d4f', background: 'linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          🎆 RESET TOP PHÁO HOA
+        </h3>
+        
+        <p style={{ color: '#aaa', fontSize: '13.5px', marginBottom: '22px', lineHeight: '1.6', textAlign: 'center' }}>
+          Đặt lại số lượng Pháo Hoa đã bắn của **TẤT CẢ** nhân vật về 0 để làm mới Bảng Xếp Hạng Đua Top Pháo Hoa. 
+          <br />
+          <span style={{ color: '#ff4d4f', fontWeight: 'bold' }}>*Khuyến nghị nên làm khi bảo trì.*</span>
+        </p>
+
+        <button 
+          type="button" 
+          onClick={() => handleOpenResetModal(
+            'RESET TOP PHÁO HOA',
+            '🎆',
+            '#ff4d4f',
+            'Đặt lại toàn bộ số lượng Pháo Hoa đã bắn của TẤT CẢ nhân vật về 0 để làm mới Bảng Xếp Hạng Đua Top Pháo Hoa.',
+            'admin/reset_phaohoa'
+          )}
+          style={{
+            ...styles.btnSubmit,
+            backgroundColor: '#ff4d4f',
+            boxShadow: '0 4px 12px rgba(255, 77, 79, 0.25)',
+          }}
+          onMouseOver={(e) => e.target.style.backgroundColor = '#cf1322'}
+          onMouseOut={(e) => e.target.style.backgroundColor = '#ff4d4f'}
+        >
+          Xác Nhận Reset Toàn Bộ
+        </button>
+      </div>
+
+      {/* MODAL / BOX THÔNG BÁO XÁC NHẬN & KẾT QUẢ RESET */}
+      {resetModal.isOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.78)',
+            backdropFilter: 'blur(6px)',
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={handleCloseResetModal}
+        >
+          <div
+            style={{
+              background: 'linear-gradient(145deg, #181c24 0%, #11141a 100%)',
+              border: `1px solid ${
+                resetModal.result
+                  ? resetModal.result.success
+                    ? 'rgba(82, 196, 26, 0.5)'
+                    : 'rgba(255, 77, 79, 0.5)'
+                  : resetModal.color
+                  ? resetModal.color + '60'
+                  : 'rgba(255, 51, 102, 0.5)'
+              }`,
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '460px',
+              padding: '28px 24px',
+              textAlign: 'center',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+              color: '#fff',
+              position: 'relative'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Nếu đang ở bước xác nhận (chưa có kết quả) */}
+            {!resetModal.result ? (
+              <>
+                <div style={{ fontSize: '46px', marginBottom: '12px' }}>
+                  {resetModal.icon || '⚠️'}
+                </div>
+                <h3
+                  style={{
+                    color: resetModal.color || '#ff4d4f',
+                    margin: '0 0 16px 0',
+                    fontSize: '18px',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  {resetModal.title}
+                </h3>
+
+                <div
+                  style={{
+                    background: 'rgba(255, 77, 79, 0.08)',
+                    border: '1px solid rgba(255, 77, 79, 0.25)',
+                    borderRadius: '10px',
+                    padding: '14px 16px',
+                    marginBottom: '22px',
+                    textAlign: 'left',
+                    fontSize: '13.5px',
+                    lineHeight: '1.6',
+                    color: '#e2e8f0'
+                  }}
+                >
+                  <div
+                    style={{
+                      color: '#ff7875',
+                      fontWeight: '700',
+                      marginBottom: '6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <span>⚠️ CẢNH BÁO CỰC KỲ QUAN TRỌNG:</span>
+                  </div>
+                  <div>{resetModal.warningText}</div>
+                  <div style={{ marginTop: '8px', color: '#ff4d4f', fontSize: '12px', fontWeight: 'bold' }}>
+                    * Thao tác sẽ áp dụng cho TOÀN BỘ dữ liệu và không thể hoàn tác!
+                  </div>
+                  <div style={{ color: '#aaa', fontSize: '12px', marginTop: '2px' }}>
+                    * Khuyến nghị nên thực hiện khi server đang bảo trì.
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                  <button
+                    type="button"
+                    disabled={resetModal.loading}
+                    onClick={handleCloseResetModal}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: '#2d3748',
+                      color: '#cbd5e1',
+                      border: '1px solid #4a5568',
+                      borderRadius: '8px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: resetModal.loading ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => {
+                      if (!resetModal.loading) e.target.style.background = '#374151';
+                    }}
+                    onMouseOut={(e) => {
+                      if (!resetModal.loading) e.target.style.background = '#2d3748';
+                    }}
+                  >
+                    Hủy Bỏ
+                  </button>
+                  <button
+                    type="button"
+                    disabled={resetModal.loading}
+                    onClick={handleConfirmReset}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: resetModal.color || '#ff4d4f',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontWeight: '700',
+                      fontSize: '14px',
+                      cursor: resetModal.loading ? 'not-allowed' : 'pointer',
+                      boxShadow: `0 4px 14px ${resetModal.color ? resetModal.color + '40' : 'rgba(255, 77, 79, 0.4)'}`,
+                      opacity: resetModal.loading ? 0.7 : 1,
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {resetModal.loading ? '⏳ Đang Xử Lý...' : 'Xác Nhận Reset'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* Bước hiển thị kết quả xử lý */
+              <>
+                <div style={{ fontSize: '50px', marginBottom: '14px' }}>
+                  {resetModal.result.success ? '✅' : '❌'}
+                </div>
+                <h3
+                  style={{
+                    color: resetModal.result.success ? '#52c41a' : '#ff4d4f',
+                    margin: '0 0 12px 0',
+                    fontSize: '19px',
+                    fontWeight: '700',
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  {resetModal.result.success ? 'RESET THÀNH CÔNG' : 'RESET THẤT BẠI'}
+                </h3>
+
+                <p
+                  style={{
+                    color: '#e2e8f0',
+                    fontSize: '14px',
+                    lineHeight: '1.6',
+                    marginBottom: '24px',
+                    padding: '0 10px'
+                  }}
+                >
+                  {resetModal.result.message}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleCloseResetModal}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    background: resetModal.result.success ? '#52c41a' : '#ff4d4f',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontWeight: '700',
+                    fontSize: '15px',
+                    cursor: 'pointer',
+                    boxShadow: resetModal.result.success
+                      ? '0 4px 14px rgba(82, 196, 26, 0.35)'
+                      : '0 4px 14px rgba(255, 77, 79, 0.35)'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.filter = 'brightness(1.1)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.filter = 'none';
+                  }}
+                >
+                  Đã Hiểu / Đóng
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

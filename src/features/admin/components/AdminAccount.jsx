@@ -79,6 +79,17 @@ function AdminAccount() {
   const [detailData, setDetailData] = useState(null);
   const [detailTab, setDetailTab] = useState('overview');
   const [invSubTab, setInvSubTab] = useState('bag3');
+  const [fashionSubTab, setFashionSubTab] = useState('costumes');
+  const [fashionSearch, setFashionSearch] = useState('');
+  const [invSearch, setInvSearch] = useState('');
+
+  // Delete Item modal (single item / with quantity)
+  const [deleteItemTarget, setDeleteItemTarget] = useState(null);
+  const [submittingDeleteItem, setSubmittingDeleteItem] = useState(false);
+
+  // Clear container / clear fashion confirm modal
+  const [clearTargetModal, setClearTargetModal] = useState(null);
+  const [submittingClearTarget, setSubmittingClearTarget] = useState(false);
 
   // Adjust Currency Modal state
   const [currencyModalOpen, setCurrencyModalOpen] = useState(false);
@@ -202,6 +213,75 @@ function AdminAccount() {
       showMessage('error', 'Lỗi kết nối máy chủ khi lấy chi tiết tài khoản!');
     } finally {
       setDetailLoading(false);
+    }
+  };
+
+  const reloadAccountDetail = async (username) => {
+    if (!username) return;
+    try {
+      const res = await api.get('admin/account_detail', { params: { username } });
+      if (res.data.success) {
+        setDetailData(res.data);
+      }
+    } catch (e) {
+      console.error('Lỗi khi tải lại chi tiết tài khoản:', e);
+    }
+  };
+
+  const handleConfirmDeleteItem = async () => {
+    if (!deleteItemTarget || !detailData?.account) return;
+    setSubmittingDeleteItem(true);
+    try {
+      const payload = {
+        username: detailData.account.user,
+        charName: detailData.player?.name,
+        action: 'delete_inventory_item',
+        container: deleteItemTarget.container,
+        itemIndex: deleteItemTarget.itemIndex,
+        quantity: deleteItemTarget.deleteMode === 'all' ? deleteItemTarget.maxQuant : deleteItemTarget.quantToDelete
+      };
+      const res = await api.post('admin/delete_player_item', payload);
+      if (res.data.success) {
+        showMessage('success', res.data.message);
+        setDeleteItemTarget(null);
+        await reloadAccountDetail(detailData.account.user);
+      } else {
+        showMessage('error', res.data.message || 'Không thể xóa vật phẩm!');
+      }
+    } catch (err) {
+      showMessage('error', err.response?.data?.message || 'Lỗi kết nối khi xóa vật phẩm!');
+    } finally {
+      setSubmittingDeleteItem(false);
+    }
+  };
+
+  const handleConfirmClearOrFashionAction = async () => {
+    if (!clearTargetModal || !detailData?.account) return;
+    setSubmittingClearTarget(true);
+    try {
+      const payload = {
+        username: detailData.account.user,
+        charName: detailData.player?.name,
+        action: clearTargetModal.action,
+        container: clearTargetModal.container,
+        itemIndex: clearTargetModal.itemIndex,
+        fashionType: clearTargetModal.fashionType,
+        fashionId: clearTargetModal.fashionId,
+        category: clearTargetModal.category,
+        scope: clearTargetModal.scope
+      };
+      const res = await api.post('admin/delete_player_item', payload);
+      if (res.data.success) {
+        showMessage('success', res.data.message);
+        setClearTargetModal(null);
+        await reloadAccountDetail(detailData.account.user);
+      } else {
+        showMessage('error', res.data.message || 'Thao tác không thành công!');
+      }
+    } catch (err) {
+      showMessage('error', err.response?.data?.message || 'Lỗi kết nối máy chủ!');
+    } finally {
+      setSubmittingClearTarget(false);
     }
   };
 
@@ -1876,6 +1956,38 @@ function AdminAccount() {
               >
                 <span>🎒 Hành Trang & Rương Đồ</span>
               </button>
+
+              <button
+                onClick={() => setDetailTab('fashion')}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: detailTab === 'fashion' ? '1px solid #ff85c0' : '1px solid rgba(255,255,255,0.08)',
+                  background: detailTab === 'fashion' ? 'rgba(255, 133, 192, 0.25)' : 'transparent',
+                  color: detailTab === 'fashion' ? '#ff85c0' : '#aaa',
+                  cursor: 'pointer',
+                  fontWeight: detailTab === 'fashion' ? '700' : '500',
+                  fontSize: '13.5px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span>👗 Tủ Đồ Thời Trang</span>
+                {detailData?.player?.fashionData && (
+                  <span style={{ 
+                    fontSize: '11px', 
+                    padding: '1px 6px', 
+                    borderRadius: '10px', 
+                    background: 'rgba(255, 133, 192, 0.2)', 
+                    border: '1px solid rgba(255, 133, 192, 0.4)',
+                    color: '#ff85c0'
+                  }}>
+                    {detailData.player.fashionData.totalCostumes + detailData.player.fashionData.totalHairstyles}
+                  </span>
+                )}
+              </button>
             </div>
 
             {/* Modal Body / Tab Contents */}
@@ -2724,6 +2836,25 @@ function AdminAccount() {
                         </div>
                       ) : (
                         <>
+                          {detailData.account.onl === 1 && (
+                            <div style={{
+                              background: 'rgba(255, 77, 79, 0.12)',
+                              border: '1px solid rgba(255, 77, 79, 0.35)',
+                              borderRadius: '10px',
+                              padding: '12px 16px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '10px',
+                              fontSize: '13px',
+                              color: '#ff7875'
+                            }}>
+                              <span style={{ fontSize: '18px' }}>⚠️</span>
+                              <div>
+                                <strong>Lưu ý:</strong> Tài khoản đang <strong>ONLINE</strong> trong game! Nếu xóa đồ khi đang online, dữ liệu có thể bị game server ghi đè khi nhân vật lưu lại. Khuyên admin yêu cầu người chơi thoát game trước khi xóa!
+                              </div>
+                            </div>
+                          )}
+
                           {/* Sub-tab switcher */}
                           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '12px' }}>
                             <button
@@ -2788,79 +2919,796 @@ function AdminAccount() {
                             </button>
                           </div>
 
+                          {/* Inventory Search & Clear All Container Action Bar */}
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            gap: '10px',
+                            background: 'rgba(255,255,255,0.02)',
+                            padding: '10px 14px',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(255,255,255,0.05)'
+                          }}>
+                            <div style={{ position: 'relative', minWidth: '220px', flex: 1, maxWidth: '360px' }}>
+                              <input
+                                type="text"
+                                placeholder="🔍 Lọc vật phẩm theo tên / ID..."
+                                value={invSearch}
+                                onChange={(e) => setInvSearch(e.target.value)}
+                                style={{
+                                  width: '100%',
+                                  padding: '7px 12px',
+                                  borderRadius: '6px',
+                                  border: '1px solid rgba(255,255,255,0.12)',
+                                  background: 'rgba(0,0,0,0.4)',
+                                  color: '#fff',
+                                  fontSize: '12.5px',
+                                  outline: 'none'
+                                }}
+                              />
+                              {invSearch && (
+                                <button
+                                  type="button"
+                                  onClick={() => setInvSearch('')}
+                                  style={{
+                                    position: 'absolute',
+                                    right: '8px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#aaa',
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              {invSubTab === 'bag3' && detailData.player.bagItems.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setClearTargetModal({
+                                    open: true,
+                                    action: 'clear_inventory_container',
+                                    container: 'bag3',
+                                    title: 'Xóa Sạch Túi Trang Bị (bag3)',
+                                    message: `Bạn có chắc muốn xóa TOÀN BỘ ${detailData.player.bagItems.length} trang bị trong Túi của '${detailData.player.name}'?`
+                                  })}
+                                  style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '6px',
+                                    border: '1px solid rgba(255, 77, 79, 0.4)',
+                                    background: 'rgba(255, 77, 79, 0.15)',
+                                    color: '#ff7875',
+                                    cursor: 'pointer',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                  }}
+                                >
+                                  🗑️ Xóa toàn bộ túi trang bị
+                                </button>
+                              )}
+                              {invSubTab === 'bag47' && detailData.player.bagSupplies.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setClearTargetModal({
+                                    open: true,
+                                    action: 'clear_inventory_container',
+                                    container: 'bag47',
+                                    title: 'Xóa Sạch Túi Vật Phẩm (bag47)',
+                                    message: `Bạn có chắc muốn xóa TOÀN BỘ ${detailData.player.bagSupplies.length} loại vật phẩm trong Túi của '${detailData.player.name}'?`
+                                  })}
+                                  style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '6px',
+                                    border: '1px solid rgba(255, 77, 79, 0.4)',
+                                    background: 'rgba(255, 77, 79, 0.15)',
+                                    color: '#ff7875',
+                                    cursor: 'pointer',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                  }}
+                                >
+                                  🗑️ Xóa toàn bộ túi vật phẩm
+                                </button>
+                              )}
+                              {invSubTab === 'box3' && detailData.player.boxItems.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setClearTargetModal({
+                                    open: true,
+                                    action: 'clear_inventory_container',
+                                    container: 'box3',
+                                    title: 'Xóa Sạch Rương Trang Bị (box3)',
+                                    message: `Bạn có chắc muốn xóa TOÀN BỘ ${detailData.player.boxItems.length} trang bị trong Rương của '${detailData.player.name}'?`
+                                  })}
+                                  style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '6px',
+                                    border: '1px solid rgba(255, 77, 79, 0.4)',
+                                    background: 'rgba(255, 77, 79, 0.15)',
+                                    color: '#ff7875',
+                                    cursor: 'pointer',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                  }}
+                                >
+                                  🗑️ Xóa toàn bộ rương trang bị
+                                </button>
+                              )}
+                              {invSubTab === 'box47' && detailData.player.boxSupplies.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setClearTargetModal({
+                                    open: true,
+                                    action: 'clear_inventory_container',
+                                    container: 'box47',
+                                    title: 'Xóa Sạch Rương Vật Phẩm (box47)',
+                                    message: `Bạn có chắc muốn xóa TOÀN BỘ ${detailData.player.boxSupplies.length} loại vật phẩm trong Rương của '${detailData.player.name}'?`
+                                  })}
+                                  style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '6px',
+                                    border: '1px solid rgba(255, 77, 79, 0.4)',
+                                    background: 'rgba(255, 77, 79, 0.15)',
+                                    color: '#ff7875',
+                                    cursor: 'pointer',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                  }}
+                                >
+                                  🗑️ Xóa toàn bộ rương vật phẩm
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
                           {/* Bag3: Trang bị trong túi */}
-                          {invSubTab === 'bag3' && (
-                            detailData.player.bagItems.length === 0 ? (
-                              <div style={{ textAlign: 'center', padding: '30px', color: '#777' }}>Túi trang bị trống</div>
-                            ) : (
-                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
-                                {detailData.player.bagItems.map((it, idx) => (
-                                  <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: `1px solid ${it.colorMeta.color}35`, borderRadius: '10px', padding: '12px', fontSize: '13px' }}>
-                                    <div style={{ fontWeight: 'bold', color: it.colorMeta.color }}>{it.name} {it.levelup > 0 && `+${it.levelup}`}</div>
-                                    <div style={{ fontSize: '11.5px', color: '#888', marginTop: '2px' }}>{it.typeEquipName} • Phẩm chất: {it.colorMeta.text}</div>
+                          {invSubTab === 'bag3' && (() => {
+                            const filtered = detailData.player.bagItems.filter(it => {
+                              if (!invSearch.trim()) return true;
+                              const q = invSearch.toLowerCase().trim();
+                              return (it.name || '').toLowerCase().includes(q) || String(it.templateId).includes(q) || (it.typeEquipName || '').toLowerCase().includes(q);
+                            });
+                            if (filtered.length === 0) {
+                              return <div style={{ textAlign: 'center', padding: '30px', color: '#777' }}>{invSearch ? 'Không tìm thấy trang bị phù hợp từ khóa' : 'Túi trang bị trống'}</div>;
+                            }
+                            return (
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
+                                {filtered.map((it, idx) => (
+                                  <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: `1px solid ${it.colorMeta.color}35`, borderRadius: '10px', padding: '12px', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
+                                      <div>
+                                        <div style={{ fontWeight: 'bold', color: it.colorMeta.color }}>
+                                          {it.name} {it.levelup > 0 && `+${it.levelup}`}
+                                          {it.isFashionItem && <span style={{ fontSize: '11px', color: '#ff85c0', marginLeft: '6px', padding: '1px 5px', borderRadius: '4px', background: 'rgba(255,133,192,0.15)', border: '1px solid rgba(255,133,192,0.3)' }}>Thời trang</span>}
+                                        </div>
+                                        <div style={{ fontSize: '11.5px', color: '#888', marginTop: '2px' }}>{it.typeEquipName} (ID: #{it.templateId}) • Phẩm chất: {it.colorMeta.text}</div>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => setClearTargetModal({
+                                          open: true,
+                                          action: 'delete_inventory_item',
+                                          container: 'bag3',
+                                          itemIndex: it.itemIndex,
+                                          title: 'Xóa Trang Bị Khỏi Túi',
+                                          message: `Bạn có chắc muốn xóa trang bị '${it.name}' (ID: #${it.templateId}) khỏi Túi của '${detailData.player.name}'?`
+                                        })}
+                                        style={{
+                                          padding: '3px 8px',
+                                          borderRadius: '6px',
+                                          border: '1px solid rgba(255, 77, 79, 0.4)',
+                                          background: 'rgba(255, 77, 79, 0.12)',
+                                          color: '#ff4d4f',
+                                          cursor: 'pointer',
+                                          fontSize: '11px',
+                                          fontWeight: 'bold',
+                                          flexShrink: 0
+                                        }}
+                                        title="Xóa trang bị này"
+                                      >
+                                        🗑️ Xóa
+                                      </button>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
-                            )
-                          )}
+                            );
+                          })()}
 
                           {/* Bag47: Dược phẩm & đá */}
-                          {invSubTab === 'bag47' && (
-                            detailData.player.bagSupplies.length === 0 ? (
-                              <div style={{ textAlign: 'center', padding: '30px', color: '#777' }}>Túi vật phẩm trống</div>
-                            ) : (
-                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-                                {detailData.player.bagSupplies.map((it, idx) => (
-                                  <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
-                                    <div>
-                                      <div style={{ fontWeight: '600', color: '#52c41a' }}>{it.name}</div>
+                          {invSubTab === 'bag47' && (() => {
+                            const filtered = detailData.player.bagSupplies.filter(it => {
+                              if (!invSearch.trim()) return true;
+                              const q = invSearch.toLowerCase().trim();
+                              return (it.name || '').toLowerCase().includes(q) || String(it.id).includes(q) || (it.catName || '').toLowerCase().includes(q);
+                            });
+                            if (filtered.length === 0) {
+                              return <div style={{ textAlign: 'center', padding: '30px', color: '#777' }}>{invSearch ? 'Không tìm thấy vật phẩm phù hợp từ khóa' : 'Túi vật phẩm trống'}</div>;
+                            }
+                            return (
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+                                {filtered.map((it, idx) => (
+                                  <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: it.isFashionItem ? '1px solid rgba(255,133,192,0.35)' : '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
+                                    <div style={{ minWidth: 0 }}>
+                                      <div style={{ fontWeight: '600', color: it.isFashionItem ? '#ff85c0' : '#52c41a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.name}</span>
+                                        {it.isFashionItem && <span style={{ fontSize: '10px', padding: '1px 5px', borderRadius: '4px', background: 'rgba(255,133,192,0.2)', border: '1px solid rgba(255,133,192,0.4)', color: '#ff85c0', flexShrink: 0 }}>Thời trang</span>}
+                                      </div>
                                       <div style={{ fontSize: '11px', color: '#777' }}>{it.catName} (ID: #{it.id})</div>
                                     </div>
-                                    <span style={{ background: 'rgba(82,196,26,0.15)', color: '#52c41a', padding: '2px 8px', borderRadius: '6px', fontWeight: 'bold' }}>
-                                      x{it.quant.toLocaleString()}
-                                    </span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                                      <span style={{ background: 'rgba(82,196,26,0.15)', color: '#52c41a', padding: '2px 8px', borderRadius: '6px', fontWeight: 'bold' }}>
+                                        x{it.quant.toLocaleString()}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setDeleteItemTarget({
+                                          item: it,
+                                          container: 'bag47',
+                                          itemIndex: it.itemIndex,
+                                          isSupply: true,
+                                          maxQuant: it.quant,
+                                          quantToDelete: it.quant,
+                                          deleteMode: 'all'
+                                        })}
+                                        style={{
+                                          padding: '4px 8px',
+                                          borderRadius: '6px',
+                                          border: '1px solid rgba(255, 77, 79, 0.4)',
+                                          background: 'rgba(255, 77, 79, 0.12)',
+                                          color: '#ff4d4f',
+                                          cursor: 'pointer',
+                                          fontSize: '11px',
+                                          fontWeight: 'bold'
+                                        }}
+                                        title="Xóa vật phẩm này (chọn số lượng hoặc xóa tất cả)"
+                                      >
+                                        🗑️ Xóa
+                                      </button>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
-                            )
-                          )}
+                            );
+                          })()}
 
                           {/* Box3: Rương trang bị */}
-                          {invSubTab === 'box3' && (
-                            detailData.player.boxItems.length === 0 ? (
-                              <div style={{ textAlign: 'center', padding: '30px', color: '#777' }}>Rương trang bị trống</div>
-                            ) : (
-                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
-                                {detailData.player.boxItems.map((it, idx) => (
-                                  <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: `1px solid ${it.colorMeta.color}35`, borderRadius: '10px', padding: '12px', fontSize: '13px' }}>
-                                    <div style={{ fontWeight: 'bold', color: it.colorMeta.color }}>{it.name} {it.levelup > 0 && `+${it.levelup}`}</div>
-                                    <div style={{ fontSize: '11.5px', color: '#888', marginTop: '2px' }}>{it.typeEquipName} • Phẩm chất: {it.colorMeta.text}</div>
+                          {invSubTab === 'box3' && (() => {
+                            const filtered = detailData.player.boxItems.filter(it => {
+                              if (!invSearch.trim()) return true;
+                              const q = invSearch.toLowerCase().trim();
+                              return (it.name || '').toLowerCase().includes(q) || String(it.templateId).includes(q) || (it.typeEquipName || '').toLowerCase().includes(q);
+                            });
+                            if (filtered.length === 0) {
+                              return <div style={{ textAlign: 'center', padding: '30px', color: '#777' }}>{invSearch ? 'Không tìm thấy trang bị phù hợp từ khóa' : 'Rương trang bị trống'}</div>;
+                            }
+                            return (
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
+                                {filtered.map((it, idx) => (
+                                  <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: `1px solid ${it.colorMeta.color}35`, borderRadius: '10px', padding: '12px', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
+                                      <div>
+                                        <div style={{ fontWeight: 'bold', color: it.colorMeta.color }}>
+                                          {it.name} {it.levelup > 0 && `+${it.levelup}`}
+                                          {it.isFashionItem && <span style={{ fontSize: '11px', color: '#ff85c0', marginLeft: '6px', padding: '1px 5px', borderRadius: '4px', background: 'rgba(255,133,192,0.15)', border: '1px solid rgba(255,133,192,0.3)' }}>Thời trang</span>}
+                                        </div>
+                                        <div style={{ fontSize: '11.5px', color: '#888', marginTop: '2px' }}>{it.typeEquipName} (ID: #{it.templateId}) • Phẩm chất: {it.colorMeta.text}</div>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => setClearTargetModal({
+                                          open: true,
+                                          action: 'delete_inventory_item',
+                                          container: 'box3',
+                                          itemIndex: it.itemIndex,
+                                          title: 'Xóa Trang Bị Khỏi Rương',
+                                          message: `Bạn có chắc muốn xóa trang bị '${it.name}' (ID: #${it.templateId}) khỏi Rương của '${detailData.player.name}'?`
+                                        })}
+                                        style={{
+                                          padding: '3px 8px',
+                                          borderRadius: '6px',
+                                          border: '1px solid rgba(255, 77, 79, 0.4)',
+                                          background: 'rgba(255, 77, 79, 0.12)',
+                                          color: '#ff4d4f',
+                                          cursor: 'pointer',
+                                          fontSize: '11px',
+                                          fontWeight: 'bold',
+                                          flexShrink: 0
+                                        }}
+                                        title="Xóa trang bị này"
+                                      >
+                                        🗑️ Xóa
+                                      </button>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
-                            )
-                          )}
+                            );
+                          })()}
 
                           {/* Box47: Rương vật phẩm */}
-                          {invSubTab === 'box47' && (
-                            detailData.player.boxSupplies.length === 0 ? (
-                              <div style={{ textAlign: 'center', padding: '30px', color: '#777' }}>Rương vật phẩm trống</div>
-                            ) : (
-                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-                                {detailData.player.boxSupplies.map((it, idx) => (
-                                  <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
-                                    <div>
-                                      <div style={{ fontWeight: '600', color: '#b37feb' }}>{it.name}</div>
+                          {invSubTab === 'box47' && (() => {
+                            const filtered = detailData.player.boxSupplies.filter(it => {
+                              if (!invSearch.trim()) return true;
+                              const q = invSearch.toLowerCase().trim();
+                              return (it.name || '').toLowerCase().includes(q) || String(it.id).includes(q) || (it.catName || '').toLowerCase().includes(q);
+                            });
+                            if (filtered.length === 0) {
+                              return <div style={{ textAlign: 'center', padding: '30px', color: '#777' }}>{invSearch ? 'Không tìm thấy vật phẩm phù hợp từ khóa' : 'Rương vật phẩm trống'}</div>;
+                            }
+                            return (
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+                                {filtered.map((it, idx) => (
+                                  <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: it.isFashionItem ? '1px solid rgba(255,133,192,0.35)' : '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
+                                    <div style={{ minWidth: 0 }}>
+                                      <div style={{ fontWeight: '600', color: it.isFashionItem ? '#ff85c0' : '#b37feb', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.name}</span>
+                                        {it.isFashionItem && <span style={{ fontSize: '10px', padding: '1px 5px', borderRadius: '4px', background: 'rgba(255,133,192,0.2)', border: '1px solid rgba(255,133,192,0.4)', color: '#ff85c0', flexShrink: 0 }}>Thời trang</span>}
+                                      </div>
                                       <div style={{ fontSize: '11px', color: '#777' }}>{it.catName} (ID: #{it.id})</div>
                                     </div>
-                                    <span style={{ background: 'rgba(146,84,222,0.15)', color: '#b37feb', padding: '2px 8px', borderRadius: '6px', fontWeight: 'bold' }}>
-                                      x{it.quant.toLocaleString()}
-                                    </span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                                      <span style={{ background: 'rgba(146,84,222,0.15)', color: '#b37feb', padding: '2px 8px', borderRadius: '6px', fontWeight: 'bold' }}>
+                                        x{it.quant.toLocaleString()}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setDeleteItemTarget({
+                                          item: it,
+                                          container: 'box47',
+                                          itemIndex: it.itemIndex,
+                                          isSupply: true,
+                                          maxQuant: it.quant,
+                                          quantToDelete: it.quant,
+                                          deleteMode: 'all'
+                                        })}
+                                        style={{
+                                          padding: '4px 8px',
+                                          borderRadius: '6px',
+                                          border: '1px solid rgba(255, 77, 79, 0.4)',
+                                          background: 'rgba(255, 77, 79, 0.12)',
+                                          color: '#ff4d4f',
+                                          cursor: 'pointer',
+                                          fontSize: '11px',
+                                          fontWeight: 'bold'
+                                        }}
+                                        title="Xóa vật phẩm này (chọn số lượng hoặc xóa tất cả)"
+                                      >
+                                        🗑️ Xóa
+                                      </button>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
-                            )
+                            );
+                          })()}
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 5: TỦ ĐỒ THỜI TRANG */}
+                  {detailTab === 'fashion' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      {!detailData.player ? (
+                        <div style={{ textAlign: 'center', padding: '40px', color: '#aaa' }}>
+                          ⚠️ Tài khoản chưa tạo nhân vật nên chưa có tủ đồ thời trang.
+                        </div>
+                      ) : (
+                        <>
+                          {detailData.account.onl === 1 && (
+                            <div style={{
+                              background: 'rgba(255, 77, 79, 0.12)',
+                              border: '1px solid rgba(255, 77, 79, 0.35)',
+                              borderRadius: '10px',
+                              padding: '12px 16px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '10px',
+                              fontSize: '13px',
+                              color: '#ff7875'
+                            }}>
+                              <span style={{ fontSize: '18px' }}>⚠️</span>
+                              <div>
+                                <strong>Lưu ý:</strong> Tài khoản đang <strong>ONLINE</strong> trong game! Nếu xóa thời trang khi đang online, dữ liệu có thể bị game server ghi đè khi nhân vật lưu lại. Khuyên admin yêu cầu người chơi thoát game trước khi xóa!
+                              </div>
+                            </div>
                           )}
+
+                          {/* Fashion Header Bar */}
+                          <div style={{
+                            background: 'linear-gradient(135deg, rgba(255, 133, 192, 0.15) 0%, rgba(20,20,20,0.6) 100%)',
+                            border: '1px solid rgba(255, 133, 192, 0.35)',
+                            borderRadius: '14px',
+                            padding: '18px 20px',
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            gap: '14px'
+                          }}>
+                            <div>
+                              <div style={{ fontSize: '16px', fontWeight: '800', color: '#ff85c0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span>👗 QUẢN LÝ TỦ ĐỒ THỜI TRANG & NGOẠI HÌNH</span>
+                              </div>
+                              <div style={{ fontSize: '13px', color: '#bbb', marginTop: '4px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                                <span>👘 Trang phục: <strong style={{ color: '#ff85c0' }}>{detailData.player?.fashionData?.totalCostumes || 0} bộ</strong></span>
+                                <span>💇 Kiểu tóc & Thẩm mỹ: <strong style={{ color: '#69c0ff' }}>{detailData.player?.fashionData?.totalHairstyles || 0} kiểu</strong></span>
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                              <button
+                                type="button"
+                                onClick={() => setClearTargetModal({
+                                  open: true,
+                                  action: 'clear_fashion',
+                                  scope: 'all',
+                                  title: 'Xóa Sạch Toàn Bộ Tủ Đồ Thời Trang',
+                                  message: `Bạn có chắc chắn muốn xóa TOÀN BỘ (${(detailData.player?.fashionData?.totalCostumes || 0) + (detailData.player?.fashionData?.totalHairstyles || 0)} món) thời trang và kiểu tóc của '${detailData.player.name}'? Thao tác này tương đương lệnh /xoatt all.`
+                                })}
+                                disabled={((detailData.player?.fashionData?.totalCostumes || 0) + (detailData.player?.fashionData?.totalHairstyles || 0)) === 0}
+                                style={{
+                                  padding: '7px 14px',
+                                  borderRadius: '8px',
+                                  border: '1px solid rgba(255, 77, 79, 0.5)',
+                                  background: 'linear-gradient(135deg, rgba(255, 77, 79, 0.25) 0%, rgba(207, 19, 34, 0.35) 100%)',
+                                  color: '#ff7875',
+                                  cursor: ((detailData.player?.fashionData?.totalCostumes || 0) + (detailData.player?.fashionData?.totalHairstyles || 0)) === 0 ? 'not-allowed' : 'pointer',
+                                  fontSize: '12.5px',
+                                  fontWeight: 'bold',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px'
+                                }}
+                              >
+                                🗑️ Xóa TẤT CẢ Thời Trang
+                              </button>
+
+                              {fashionSubTab === 'costumes' && (detailData.player?.fashionData?.totalCostumes || 0) > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setClearTargetModal({
+                                    open: true,
+                                    action: 'clear_fashion',
+                                    scope: 'costumes',
+                                    title: 'Xóa Tất Cả Trang Phục Thời Trang',
+                                    message: `Bạn có chắc muốn xóa toàn bộ ${detailData.player?.fashionData?.totalCostumes} bộ trang phục của '${detailData.player.name}'?`
+                                  })}
+                                  style={{
+                                    padding: '7px 12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(255, 133, 192, 0.4)',
+                                    background: 'rgba(255, 133, 192, 0.15)',
+                                    color: '#ff85c0',
+                                    cursor: 'pointer',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                  }}
+                                >
+                                  🧹 Xóa tất cả Trang phục
+                                </button>
+                              )}
+
+                              {fashionSubTab === 'hairstyles' && (detailData.player?.fashionData?.totalHairstyles || 0) > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setClearTargetModal({
+                                    open: true,
+                                    action: 'clear_fashion',
+                                    scope: 'hair',
+                                    title: 'Xóa Tất Cả Kiểu Tóc & Thẩm Mỹ',
+                                    message: `Bạn có chắc muốn xóa toàn bộ ${detailData.player?.fashionData?.totalHairstyles} kiểu tóc & thẩm mỹ của '${detailData.player.name}'?`
+                                  })}
+                                  style={{
+                                    padding: '7px 12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(105, 192, 255, 0.4)',
+                                    background: 'rgba(105, 192, 255, 0.15)',
+                                    color: '#69c0ff',
+                                    cursor: 'pointer',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                  }}
+                                >
+                                  🧹 Xóa tất cả Tóc / Thẩm mỹ
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Sub-tab Switcher & Search Bar */}
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            gap: '12px',
+                            borderBottom: '1px solid rgba(255,255,255,0.06)',
+                            paddingBottom: '12px'
+                          }}>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button
+                                onClick={() => setFashionSubTab('costumes')}
+                                style={{
+                                  padding: '6px 14px',
+                                  borderRadius: '6px',
+                                  border: fashionSubTab === 'costumes' ? '1px solid #ff85c0' : '1px solid rgba(255,255,255,0.08)',
+                                  background: fashionSubTab === 'costumes' ? 'rgba(255, 133, 192, 0.25)' : 'rgba(0,0,0,0.3)',
+                                  color: fashionSubTab === 'costumes' ? '#ff85c0' : '#aaa',
+                                  cursor: 'pointer',
+                                  fontSize: '13px',
+                                  fontWeight: fashionSubTab === 'costumes' ? 'bold' : 'normal'
+                                }}
+                              >
+                                👘 Trang Phục ({detailData.player?.fashionData?.costumes?.length || 0})
+                              </button>
+                              <button
+                                onClick={() => setFashionSubTab('hairstyles')}
+                                style={{
+                                  padding: '6px 14px',
+                                  borderRadius: '6px',
+                                  border: fashionSubTab === 'hairstyles' ? '1px solid #69c0ff' : '1px solid rgba(255,255,255,0.08)',
+                                  background: fashionSubTab === 'hairstyles' ? 'rgba(105, 192, 255, 0.25)' : 'rgba(0,0,0,0.3)',
+                                  color: fashionSubTab === 'hairstyles' ? '#69c0ff' : '#aaa',
+                                  cursor: 'pointer',
+                                  fontSize: '13px',
+                                  fontWeight: fashionSubTab === 'hairstyles' ? 'bold' : 'normal'
+                                }}
+                              >
+                                💇 Kiểu Tóc & Thẩm Mỹ ({detailData.player?.fashionData?.hairstyles?.length || 0})
+                              </button>
+                            </div>
+
+                            <div style={{ position: 'relative', minWidth: '220px', flex: 1, maxWidth: '360px' }}>
+                              <input
+                                type="text"
+                                placeholder="🔍 Tìm kiếm thời trang theo tên / ID..."
+                                value={fashionSearch}
+                                onChange={(e) => setFashionSearch(e.target.value)}
+                                style={{
+                                  width: '100%',
+                                  padding: '7px 12px',
+                                  borderRadius: '6px',
+                                  border: '1px solid rgba(255,255,255,0.12)',
+                                  background: 'rgba(0,0,0,0.4)',
+                                  color: '#fff',
+                                  fontSize: '12.5px',
+                                  outline: 'none'
+                                }}
+                              />
+                              {fashionSearch && (
+                                <button
+                                  type="button"
+                                  onClick={() => setFashionSearch('')}
+                                  style={{
+                                    position: 'absolute',
+                                    right: '8px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#aaa',
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Content: Costumes */}
+                          {fashionSubTab === 'costumes' && (() => {
+                            const list = (detailData.player?.fashionData?.costumes || []).filter(c => {
+                              if (!fashionSearch.trim()) return true;
+                              const q = fashionSearch.toLowerCase().trim();
+                              return (c.name || '').toLowerCase().includes(q) || String(c.id).includes(q);
+                            });
+
+                            if (list.length === 0) {
+                              return (
+                                <div style={{ textAlign: 'center', padding: '40px', color: '#777' }}>
+                                  {fashionSearch ? 'Không tìm thấy trang phục phù hợp với từ khóa' : 'Nhân vật chưa sở hữu bộ trang phục thời trang nào'}
+                                </div>
+                              );
+                            }
+
+                            return (
+                              <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                                gap: '14px'
+                              }}>
+                                {list.map((c, idx) => (
+                                  <div
+                                    key={idx}
+                                    style={{
+                                      background: 'linear-gradient(135deg, rgba(255, 133, 192, 0.08) 0%, rgba(20,20,20,0.5) 100%)',
+                                      border: c.is_use ? '1px solid #52c41a' : '1px solid rgba(255, 133, 192, 0.3)',
+                                      borderRadius: '12px',
+                                      padding: '14px',
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      gap: '8px',
+                                      boxShadow: c.is_use ? '0 0 12px rgba(82, 196, 26, 0.2)' : 'none'
+                                    }}
+                                  >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                                      <div>
+                                        <div style={{ fontSize: '14.5px', fontWeight: 'bold', color: '#ff85c0' }}>
+                                          {c.name}
+                                          {c.level > 0 && <span style={{ color: '#ffd700', marginLeft: '6px' }}>+{c.level}</span>}
+                                        </div>
+                                        <div style={{ fontSize: '11.5px', color: '#888', marginTop: '2px' }}>
+                                          Mã trang phục: #{c.id}
+                                        </div>
+                                      </div>
+
+                                      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                        {c.is_use && (
+                                          <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(82, 196, 26, 0.2)', color: '#52c41a', border: '1px solid rgba(82, 196, 26, 0.4)', fontWeight: 'bold' }}>
+                                            ✓ Đang mặc
+                                          </span>
+                                        )}
+                                        {c.expiryTime === -1 ? (
+                                          <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(250, 173, 20, 0.15)', color: '#faad14', border: '1px solid rgba(250, 173, 20, 0.3)' }}>
+                                            Vĩnh viễn
+                                          </span>
+                                        ) : c.isExpired ? (
+                                          <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(255, 77, 79, 0.2)', color: '#ff7875', border: '1px solid rgba(255, 77, 79, 0.4)' }}>
+                                            Hết hạn
+                                          </span>
+                                        ) : (
+                                          <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(24, 144, 255, 0.15)', color: '#40a9ff', border: '1px solid rgba(24, 144, 255, 0.3)' }}>
+                                            HSD: {new Date(c.expiryTime).toLocaleDateString('vi-VN')}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {c.info && (
+                                      <div style={{
+                                        fontSize: '12px',
+                                        color: '#bbb',
+                                        background: 'rgba(0,0,0,0.35)',
+                                        padding: '8px',
+                                        borderRadius: '6px',
+                                        whiteSpace: 'pre-line',
+                                        lineHeight: '1.4'
+                                      }}>
+                                        {c.info.trim()}
+                                      </div>
+                                    )}
+
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                                      <button
+                                        type="button"
+                                        onClick={() => setClearTargetModal({
+                                          open: true,
+                                          action: 'delete_fashion_item',
+                                          fashionType: 'costume',
+                                          fashionId: c.id,
+                                          title: 'Xóa Trang Phục Thời Trang',
+                                          message: `Bạn có chắc chắn muốn xóa bộ thời trang '${c.name}' (ID: #${c.id}) khỏi nhân vật '${detailData.player.name}'?`
+                                        })}
+                                        style={{
+                                          padding: '5px 12px',
+                                          borderRadius: '6px',
+                                          border: '1px solid rgba(255, 77, 79, 0.4)',
+                                          background: 'rgba(255, 77, 79, 0.12)',
+                                          color: '#ff4d4f',
+                                          cursor: 'pointer',
+                                          fontSize: '12px',
+                                          fontWeight: 'bold',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '4px'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 77, 79, 0.25)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 77, 79, 0.12)'}
+                                      >
+                                        🗑️ Xóa bộ này
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })()}
+
+                          {/* Content: Hairstyles & Aesthetics */}
+                          {fashionSubTab === 'hairstyles' && (() => {
+                            const list = (detailData.player?.fashionData?.hairstyles || []).filter(h => {
+                              if (!fashionSearch.trim()) return true;
+                              const q = fashionSearch.toLowerCase().trim();
+                              return (h.name || '').toLowerCase().includes(q) || String(h.id).includes(q) || (h.categoryName || '').toLowerCase().includes(q);
+                            });
+
+                            if (list.length === 0) {
+                              return (
+                                <div style={{ textAlign: 'center', padding: '40px', color: '#777' }}>
+                                  {fashionSearch ? 'Không tìm thấy kiểu tóc/thẩm mỹ phù hợp với từ khóa' : 'Nhân vật chưa sở hữu kiểu tóc/thẩm mỹ nào'}
+                                </div>
+                              );
+                            }
+
+                            return (
+                              <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                                gap: '12px'
+                              }}>
+                                {list.map((h, idx) => (
+                                  <div
+                                    key={idx}
+                                    style={{
+                                      background: 'linear-gradient(135deg, rgba(105, 192, 255, 0.08) 0%, rgba(20,20,20,0.5) 100%)',
+                                      border: h.is_use ? '1px solid #52c41a' : '1px solid rgba(105, 192, 255, 0.25)',
+                                      borderRadius: '12px',
+                                      padding: '14px',
+                                      display: 'flex',
+                                      justifyContent: 'space-between',
+                                      alignItems: 'center',
+                                      gap: '10px'
+                                    }}
+                                  >
+                                    <div>
+                                      <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#69c0ff' }}>
+                                        {h.name}
+                                      </div>
+                                      <div style={{ fontSize: '11.5px', color: '#888', marginTop: '2px', display: 'flex', gap: '8px' }}>
+                                        <span>{h.categoryName}</span>
+                                        <span>• ID: #{h.id}</span>
+                                      </div>
+                                      {h.is_use && (
+                                        <span style={{ display: 'inline-block', marginTop: '4px', fontSize: '10.5px', padding: '1px 6px', borderRadius: '4px', background: 'rgba(82, 196, 26, 0.2)', color: '#52c41a', border: '1px solid rgba(82, 196, 26, 0.4)', fontWeight: 'bold' }}>
+                                          ✓ Đang dùng
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => setClearTargetModal({
+                                        open: true,
+                                        action: 'delete_fashion_item',
+                                        fashionType: 'hair',
+                                        fashionId: h.id,
+                                        category: h.category,
+                                        title: 'Xóa Kiểu Tóc / Thẩm Mỹ',
+                                        message: `Bạn có chắc chắn muốn xóa '${h.name}' (${h.categoryName}, ID: #${h.id}) khỏi nhân vật '${detailData.player.name}'?`
+                                      })}
+                                      style={{
+                                        padding: '5px 10px',
+                                        borderRadius: '6px',
+                                        border: '1px solid rgba(255, 77, 79, 0.4)',
+                                        background: 'rgba(255, 77, 79, 0.12)',
+                                        color: '#ff4d4f',
+                                        cursor: 'pointer',
+                                        fontSize: '11.5px',
+                                        fontWeight: 'bold',
+                                        flexShrink: 0
+                                      }}
+                                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 77, 79, 0.25)'}
+                                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 77, 79, 0.12)'}
+                                    >
+                                      🗑️ Xóa
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })()}
                         </>
                       )}
                     </div>
@@ -3887,6 +4735,403 @@ function AdminAccount() {
                 }}
               >
                 {submittingBulkDelete ? 'Đang dọn dẹp...' : '🧹 Xác Nhận Xóa'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Xóa Vật Phẩm Có Số Lượng (Túi/Rương) */}
+      {deleteItemTarget && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(5px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 99999,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#16161a',
+            border: '1px solid rgba(255, 77, 79, 0.4)',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '480px',
+            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 77, 79, 0.2)',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              padding: '18px 24px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: 'linear-gradient(135deg, rgba(255, 77, 79, 0.15) 0%, rgba(20,20,20,0.6) 100%)'
+            }}>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 'bold', color: '#ff7875', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>🗑️ Xóa Vật Phẩm Khỏi {deleteItemTarget.container === 'bag47' ? 'Túi Đồ' : 'Rương Đồ'}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setDeleteItemTarget(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#aaa',
+                  fontSize: '20px',
+                  cursor: 'pointer'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Item Info Box */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '10px',
+                padding: '14px 16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div>
+                  <div style={{ fontSize: '15px', fontWeight: 'bold', color: deleteItemTarget.item.isFashionItem ? '#ff85c0' : '#52c41a' }}>
+                    {deleteItemTarget.item.name}
+                    {deleteItemTarget.item.isFashionItem && <span style={{ fontSize: '10px', padding: '1px 5px', borderRadius: '4px', background: 'rgba(255,133,192,0.2)', border: '1px solid rgba(255,133,192,0.4)', color: '#ff85c0', marginLeft: '6px' }}>Thời trang</span>}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#888', marginTop: '2px' }}>
+                    {deleteItemTarget.item.catName} • Mã ID: #{deleteItemTarget.item.id}
+                  </div>
+                </div>
+                <div style={{
+                  background: 'rgba(82, 196, 26, 0.2)',
+                  color: '#52c41a',
+                  border: '1px solid rgba(82, 196, 26, 0.4)',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  fontWeight: 'bold',
+                  fontSize: '14px'
+                }}>
+                  Hiện có: x{deleteItemTarget.maxQuant.toLocaleString()}
+                </div>
+              </div>
+
+              {detailData?.account?.onl === 1 && (
+                <div style={{
+                  background: 'rgba(255, 77, 79, 0.1)',
+                  border: '1px solid rgba(255, 77, 79, 0.3)',
+                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  fontSize: '12px',
+                  color: '#ff7875',
+                  lineHeight: '1.4'
+                }}>
+                  ⚠️ <strong>Cảnh báo:</strong> Nhân vật đang <strong>ONLINE</strong>! Khuyên admin nhắc người chơi thoát game trước khi xóa để tránh bị ghi đè dữ liệu.
+                </div>
+              )}
+
+              {/* Mode Selection */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  background: deleteItemTarget.deleteMode === 'all' ? 'rgba(255, 77, 79, 0.15)' : 'rgba(255,255,255,0.02)',
+                  border: deleteItemTarget.deleteMode === 'all' ? '1px solid rgba(255, 77, 79, 0.4)' : '1px solid rgba(255,255,255,0.06)',
+                  cursor: 'pointer',
+                  fontSize: '13.5px',
+                  color: deleteItemTarget.deleteMode === 'all' ? '#ff7875' : '#ccc'
+                }}>
+                  <input
+                    type="radio"
+                    name="deleteMode"
+                    checked={deleteItemTarget.deleteMode === 'all'}
+                    onChange={() => setDeleteItemTarget({ ...deleteItemTarget, deleteMode: 'all', quantToDelete: deleteItemTarget.maxQuant })}
+                  />
+                  <span>
+                    <strong>Xóa toàn bộ</strong> (Xóa hết {deleteItemTarget.maxQuant.toLocaleString()} cái)
+                  </span>
+                </label>
+
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  background: deleteItemTarget.deleteMode === 'custom' ? 'rgba(250, 173, 20, 0.15)' : 'rgba(255,255,255,0.02)',
+                  border: deleteItemTarget.deleteMode === 'custom' ? '1px solid rgba(250, 173, 20, 0.4)' : '1px solid rgba(255,255,255,0.06)',
+                  cursor: 'pointer',
+                  fontSize: '13.5px',
+                  color: deleteItemTarget.deleteMode === 'custom' ? '#ffd591' : '#ccc'
+                }}>
+                  <input
+                    type="radio"
+                    name="deleteMode"
+                    checked={deleteItemTarget.deleteMode === 'custom'}
+                    onChange={() => setDeleteItemTarget({ ...deleteItemTarget, deleteMode: 'custom', quantToDelete: Math.min(1, deleteItemTarget.maxQuant) })}
+                  />
+                  <span>
+                    <strong>Xóa một số lượng cụ thể</strong>
+                  </span>
+                </label>
+              </div>
+
+              {/* Custom Quantity Input */}
+              {deleteItemTarget.deleteMode === 'custom' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '2px' }}>
+                  <div style={{ fontSize: '12px', color: '#aaa' }}>
+                    Nhập số lượng muốn xóa (tối đa {deleteItemTarget.maxQuant.toLocaleString()}):
+                  </div>
+                  <input
+                    type="number"
+                    min="1"
+                    max={deleteItemTarget.maxQuant}
+                    value={deleteItemTarget.quantToDelete}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      const safeVal = isNaN(val) ? 1 : Math.max(1, Math.min(deleteItemTarget.maxQuant, val));
+                      setDeleteItemTarget({ ...deleteItemTarget, quantToDelete: safeVal });
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(250, 173, 20, 0.4)',
+                      background: 'rgba(0,0,0,0.5)',
+                      color: '#ffd591',
+                      fontSize: '15px',
+                      fontWeight: 'bold',
+                      outline: 'none'
+                    }}
+                  />
+
+                  {/* Quick Preset Buttons */}
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => setDeleteItemTarget({ ...deleteItemTarget, quantToDelete: 1 })}
+                      style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#ccc', fontSize: '11.5px', cursor: 'pointer' }}
+                    >
+                      1 cái
+                    </button>
+                    {deleteItemTarget.maxQuant >= 10 && (
+                      <button
+                        type="button"
+                        onClick={() => setDeleteItemTarget({ ...deleteItemTarget, quantToDelete: 10 })}
+                        style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#ccc', fontSize: '11.5px', cursor: 'pointer' }}
+                      >
+                        10 cái
+                      </button>
+                    )}
+                    {deleteItemTarget.maxQuant >= 100 && (
+                      <button
+                        type="button"
+                        onClick={() => setDeleteItemTarget({ ...deleteItemTarget, quantToDelete: 100 })}
+                        style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#ccc', fontSize: '11.5px', cursor: 'pointer' }}
+                      >
+                        100 cái
+                      </button>
+                    )}
+                    {deleteItemTarget.maxQuant >= 2 && (
+                      <button
+                        type="button"
+                        onClick={() => setDeleteItemTarget({ ...deleteItemTarget, quantToDelete: Math.ceil(deleteItemTarget.maxQuant / 2) })}
+                        style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#ccc', fontSize: '11.5px', cursor: 'pointer' }}
+                      >
+                        50% ({Math.ceil(deleteItemTarget.maxQuant / 2).toLocaleString()})
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setDeleteItemTarget({ ...deleteItemTarget, quantToDelete: deleteItemTarget.maxQuant })}
+                      style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(250,173,20,0.3)', background: 'rgba(250,173,20,0.15)', color: '#faad14', fontSize: '11.5px', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                      Tất cả ({deleteItemTarget.maxQuant.toLocaleString()})
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={{
+              padding: '16px 24px',
+              borderTop: '1px solid rgba(255,255,255,0.08)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <button
+                type="button"
+                onClick={() => setDeleteItemTarget(null)}
+                disabled={submittingDeleteItem}
+                style={{
+                  padding: '9px 18px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  background: 'transparent',
+                  color: '#aaa',
+                  cursor: 'pointer',
+                  fontSize: '13px'
+                }}
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDeleteItem}
+                disabled={submittingDeleteItem}
+                style={{
+                  padding: '9px 20px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)',
+                  color: '#fff',
+                  cursor: submittingDeleteItem ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '13.5px',
+                  boxShadow: '0 4px 15px rgba(255, 77, 79, 0.35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                {submittingDeleteItem ? 'Đang xóa...' : `🗑️ Xác Nhận Xóa ${deleteItemTarget.deleteMode === 'all' ? `Toàn Bộ (${deleteItemTarget.maxQuant.toLocaleString()})` : `${deleteItemTarget.quantToDelete.toLocaleString()} Cái`}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Xác Nhận Xóa Khay / Trang Bị / Thời Trang */}
+      {clearTargetModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(5px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 99999,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#16161a',
+            border: '1px solid rgba(255, 77, 79, 0.4)',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '460px',
+            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 77, 79, 0.2)',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              padding: '18px 24px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: 'linear-gradient(135deg, rgba(255, 77, 79, 0.15) 0%, rgba(20,20,20,0.6) 100%)'
+            }}>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 'bold', color: '#ff7875', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>⚠️ {clearTargetModal.title || 'Xác Nhận Thao Tác Xóa'}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setClearTargetModal(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#aaa',
+                  fontSize: '20px',
+                  cursor: 'pointer'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ fontSize: '14px', color: '#eee', lineHeight: '1.5' }}>
+                {clearTargetModal.message}
+              </div>
+
+              {detailData?.account?.onl === 1 && (
+                <div style={{
+                  background: 'rgba(255, 77, 79, 0.1)',
+                  border: '1px solid rgba(255, 77, 79, 0.3)',
+                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  fontSize: '12px',
+                  color: '#ff7875',
+                  lineHeight: '1.4'
+                }}>
+                  ⚠️ <strong>Cảnh báo:</strong> Nhân vật đang <strong>ONLINE</strong>! Thao tác có thể bị ghi đè khi nhân vật lưu/thoát game. Khuyên admin nhắc người chơi thoát game (OFFLINE) trước khi xóa.
+                </div>
+              )}
+
+              <div style={{ fontSize: '12px', color: '#888' }}>
+                Dữ liệu sau khi xóa sẽ được cập nhật trực tiếp vào cơ sở dữ liệu.
+              </div>
+            </div>
+
+            <div style={{
+              padding: '16px 24px',
+              borderTop: '1px solid rgba(255,255,255,0.08)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <button
+                type="button"
+                onClick={() => setClearTargetModal(null)}
+                disabled={submittingClearTarget}
+                style={{
+                  padding: '9px 18px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  background: 'transparent',
+                  color: '#aaa',
+                  cursor: 'pointer',
+                  fontSize: '13px'
+                }}
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmClearOrFashionAction}
+                disabled={submittingClearTarget}
+                style={{
+                  padding: '9px 20px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)',
+                  color: '#fff',
+                  cursor: submittingClearTarget ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '13.5px',
+                  boxShadow: '0 4px 15px rgba(255, 77, 79, 0.35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                {submittingClearTarget ? 'Đang thực hiện...' : '🗑️ Xác Nhận Xóa'}
               </button>
             </div>
           </div>

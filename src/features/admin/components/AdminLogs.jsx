@@ -3,12 +3,12 @@ import { useOutletContext } from 'react-router-dom';
 import api from '../../../api/api';
 
 const TYPE_CONFIG = {
-  ruby: { label: 'Ruby', icon: '💎', color: '#ff3366', bg: 'rgba(255, 51, 102, 0.15)', border: 'rgba(255, 51, 102, 0.35)' },
-  beri: { label: 'Beri', icon: '🪙', color: '#faad14', bg: 'rgba(250, 173, 20, 0.15)', border: 'rgba(250, 173, 20, 0.35)' },
+  market: { label: 'Chợ trời', icon: '🏪', color: '#fa8c16', bg: 'rgba(250, 140, 22, 0.15)', border: 'rgba(250, 140, 22, 0.35)' },
+  ruby: { label: 'Tiêu Ruby', icon: '💎', color: '#ff3366', bg: 'rgba(255, 51, 102, 0.15)', border: 'rgba(255, 51, 102, 0.35)' },
+  beri: { label: 'Nhận Beri', icon: '🪙', color: '#faad14', bg: 'rgba(250, 173, 20, 0.15)', border: 'rgba(250, 173, 20, 0.35)' },
   extol: { label: 'Extol', icon: '💵', color: '#00e5ff', bg: 'rgba(0, 229, 255, 0.15)', border: 'rgba(0, 229, 255, 0.35)' },
   shop: { label: 'Shop', icon: '🛒', color: '#52c41a', bg: 'rgba(82, 196, 26, 0.15)', border: 'rgba(82, 196, 26, 0.35)' },
   item: { label: 'Vật phẩm', icon: '🎁', color: '#13c2c2', bg: 'rgba(19, 194, 194, 0.15)', border: 'rgba(19, 194, 194, 0.35)' },
-  market: { label: 'Chợ trời', icon: '🏪', color: '#fa8c16', bg: 'rgba(250, 140, 22, 0.15)', border: 'rgba(250, 140, 22, 0.35)' },
   trade: { label: 'Giao dịch', icon: '🤝', color: '#722ed1', bg: 'rgba(114, 46, 209, 0.15)', border: 'rgba(114, 46, 209, 0.35)' },
   drop_pick: { label: 'Nhặt/Rơi', icon: '🎒', color: '#8c8c8c', bg: 'rgba(140, 140, 140, 0.15)', border: 'rgba(140, 140, 140, 0.35)' },
   buff: { label: 'Buff', icon: '⚡', color: '#b37feb', bg: 'rgba(179, 127, 235, 0.15)', border: 'rgba(179, 127, 235, 0.35)' },
@@ -32,6 +32,24 @@ export default function AdminLogs() {
   const [limit, setLimit] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+
+  // Trạng thái Bật/Tắt ghi nhật ký & Xóa nhật ký
+  const [loggingEnabled, setLoggingEnabled] = useState(true);
+  const [toggling, setToggling] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
+  const [clearing, setClearing] = useState(false);
+
+  // Lấy cài đặt trạng thái ghi log từ server
+  const fetchSettings = useCallback(async () => {
+    try {
+      const response = await api.get('admin/player-logs/settings');
+      if (response.data && response.data.success) {
+        setLoggingEnabled(response.data.enabled);
+      }
+    } catch (error) {
+      console.error('Fetch log settings error:', error);
+    }
+  }, []);
 
   const fetchLogs = useCallback(async (currentPage = page, currentLimit = limit, currentFilters = filters) => {
     try {
@@ -63,8 +81,55 @@ export default function AdminLogs() {
   }, [page, limit, filters, showMessage]);
 
   useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
+  useEffect(() => {
     fetchLogs(page, limit, filters);
   }, [page, limit]);
+
+  // Bật/Tắt ghi log
+  const handleToggleLogging = async () => {
+    try {
+      setToggling(true);
+      const targetState = !loggingEnabled;
+      const response = await api.post('admin/player-logs/toggle', { enabled: targetState });
+      if (response.data && response.data.success) {
+        setLoggingEnabled(targetState);
+        showMessage('success', response.data.message || (targetState ? 'Đã kích hoạt ghi nhật ký.' : 'Đã tạm dừng ghi nhật ký.'));
+      } else {
+        showMessage('error', response.data?.message || 'Không thể thay đổi trạng thái ghi log.');
+      }
+    } catch (error) {
+      console.error('Toggle logging error:', error);
+      showMessage('error', 'Lỗi kết nối khi cập nhật cài đặt ghi nhật ký.');
+    } finally {
+      setToggling(false);
+    }
+  };
+
+  // Xóa sạch toàn bộ nhật ký
+  const handleClearLogs = async () => {
+    try {
+      setClearing(true);
+      const response = await api.post('admin/player-logs/clear');
+      if (response.data && response.data.success) {
+        showMessage('success', response.data.message || 'Đã làm mới và xóa toàn bộ nhật ký hoạt động!');
+        setShowClearModal(false);
+        setLogs([]);
+        setTotal(0);
+        setPage(1);
+        fetchLogs(1, limit, filters);
+      } else {
+        showMessage('error', response.data?.message || 'Không thể xóa dữ liệu nhật ký.');
+      }
+    } catch (error) {
+      console.error('Clear logs error:', error);
+      showMessage('error', 'Lỗi khi gửi yêu cầu xóa nhật ký.');
+    } finally {
+      setClearing(false);
+    }
+  };
 
   const handleSearch = (e) => {
     if (e) e.preventDefault();
@@ -184,11 +249,63 @@ export default function AdminLogs() {
             📜 LỊCH SỬ NGƯỜI CHƠI
           </h2>
           <p style={{ color: '#aaa', margin: '6px 0 0 0', fontSize: '13.5px' }}>
-            Tra cứu và giám sát chi tiết hành động người chơi: tiêu Ruby, nhận/mất vật phẩm, thao tác buff...
+            Tra cứu và giám sát chi tiết hành động người chơi: Đăng bán & mua đồ ở chợ, Tiêu Ruby, Nhận Beri.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Trạng thái & Nút Bật/Tắt Ghi Log */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            background: 'rgba(0, 0, 0, 0.45)',
+            padding: '5px 12px',
+            borderRadius: '24px',
+            border: `1px solid ${loggingEnabled ? 'rgba(82, 196, 26, 0.45)' : 'rgba(255, 77, 79, 0.45)'}`,
+            boxShadow: loggingEnabled ? '0 0 10px rgba(82, 196, 26, 0.15)' : '0 0 10px rgba(255, 77, 79, 0.15)'
+          }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '12.5px',
+              fontWeight: '700',
+              color: loggingEnabled ? '#52c41a' : '#ff4d4f',
+              textTransform: 'uppercase',
+              letterSpacing: '0.4px'
+            }}>
+              <span style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: loggingEnabled ? '#52c41a' : '#ff4d4f',
+                boxShadow: loggingEnabled ? '0 0 8px #52c41a' : '0 0 8px #ff4d4f',
+                display: 'inline-block'
+              }} />
+              {loggingEnabled ? 'Ghi log: BẬT' : 'Ghi log: TẮT'}
+            </span>
+            <button
+              type="button"
+              onClick={handleToggleLogging}
+              disabled={toggling}
+              style={{
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                cursor: toggling ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s',
+                background: loggingEnabled ? 'rgba(255, 77, 79, 0.18)' : 'rgba(82, 196, 26, 0.18)',
+                color: loggingEnabled ? '#ff7875' : '#73d13d',
+                border: `1px solid ${loggingEnabled ? 'rgba(255, 77, 79, 0.4)' : 'rgba(82, 196, 26, 0.4)'}`
+              }}
+              title={loggingEnabled ? "Bấm để tạm dừng ghi log người chơi" : "Bấm để kích hoạt lại ghi log người chơi"}
+            >
+              {toggling ? '⏳...' : loggingEnabled ? '⏸️ Tắt ghi' : '▶️ Bật ghi'}
+            </button>
+          </div>
+
           <span style={{
             background: 'rgba(0, 229, 255, 0.1)',
             border: '1px solid rgba(0, 229, 255, 0.3)',
@@ -200,6 +317,32 @@ export default function AdminLogs() {
           }}>
             Tổng bản ghi: {total.toLocaleString()}
           </span>
+
+          {/* Nút Xóa Toàn Bộ Nhật Ký */}
+          <button
+            type="button"
+            onClick={() => setShowClearModal(true)}
+            disabled={loading || clearing}
+            style={{
+              padding: '8px 14px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, rgba(255, 77, 79, 0.15) 0%, rgba(207, 19, 34, 0.25) 100%)',
+              border: '1px solid rgba(255, 77, 79, 0.45)',
+              color: '#ff7875',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 10px rgba(255, 77, 79, 0.15)'
+            }}
+            title="Xóa toàn bộ dữ liệu nhật ký hoạt động để chống tràn database"
+          >
+            🗑️ Xóa sạch dữ liệu
+          </button>
+
           <button 
             type="button"
             onClick={() => fetchLogs(page, limit, filters)} 
@@ -207,7 +350,7 @@ export default function AdminLogs() {
             style={{ 
               borderColor: 'rgba(255,255,255,0.15)', 
               color: '#ccc', 
-              padding: '8px 16px', 
+              padding: '8px 14px', 
               fontSize: '13px', 
               background: 'rgba(255,255,255,0.03)', 
               cursor: 'pointer', 
@@ -313,15 +456,16 @@ export default function AdminLogs() {
                 }}
               >
                 <option value="" style={{ background: '#1a1a1a', color: '#fff' }}>Tất cả các loại</option>
-                <option value="ruby" style={{ background: '#1a1a1a', color: '#fff' }}>💎 Ruby (Tiêu Ruby)</option>
-                <option value="beri" style={{ background: '#1a1a1a', color: '#fff' }}>🪙 Beri (Tiêu Beri)</option>
-                <option value="extol" style={{ background: '#1a1a1a', color: '#fff' }}>💵 Extol (Tiêu Extol)</option>
-                <option value="shop" style={{ background: '#1a1a1a', color: '#fff' }}>🛒 Cửa hàng / Shop</option>
-                <option value="item" style={{ background: '#1a1a1a', color: '#fff' }}>🎁 Vật phẩm</option>
-                <option value="market" style={{ background: '#1a1a1a', color: '#fff' }}>🏪 Chợ trời</option>
-                <option value="trade" style={{ background: '#1a1a1a', color: '#fff' }}>🤝 Giao dịch</option>
-                <option value="buff" style={{ background: '#1a1a1a', color: '#fff' }}>⚡ Buff chỉ số / Admin</option>
-                <option value="coin" style={{ background: '#1a1a1a', color: '#fff' }}>💰 Coin / Tiền tệ</option>
+                <option value="market" style={{ background: '#1a1a1a', color: '#fff' }}>🏪 Chợ trời (Đăng bán & Mua đồ)</option>
+                <option value="ruby" style={{ background: '#1a1a1a', color: '#fff' }}>💎 Tiêu Ruby (Mục đích & Số lượng)</option>
+                <option value="beri" style={{ background: '#1a1a1a', color: '#fff' }}>🪙 Nhận Beri (Nguồn gốc & Vị trí)</option>
+                <option disabled style={{ background: '#2a2a2a', color: '#888' }}>──────── Dữ liệu cũ ────────</option>
+                <option value="extol" style={{ background: '#1a1a1a', color: '#fff' }}>💵 Extol (Cũ)</option>
+                <option value="shop" style={{ background: '#1a1a1a', color: '#fff' }}>🛒 Cửa hàng / Shop (Cũ)</option>
+                <option value="item" style={{ background: '#1a1a1a', color: '#fff' }}>🎁 Vật phẩm (Cũ)</option>
+                <option value="trade" style={{ background: '#1a1a1a', color: '#fff' }}>🤝 Giao dịch (Cũ)</option>
+                <option value="buff" style={{ background: '#1a1a1a', color: '#fff' }}>⚡ Buff chỉ số (Cũ)</option>
+                <option value="coin" style={{ background: '#1a1a1a', color: '#fff' }}>💰 Coin / Tiền tệ (Cũ)</option>
               </select>
             </div>
 
@@ -635,6 +779,105 @@ export default function AdminLogs() {
           </div>
         )}
       </div>
+      {/* MODAL XÁC NHẬN XÓA TOÀN BỘ NHẬT KÝ */}
+      {showClearModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.82)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={() => !clearing && setShowClearModal(false)}
+        >
+          <div
+            style={{
+              background: '#191519',
+              border: '1px solid rgba(255, 77, 79, 0.4)',
+              borderRadius: '12px',
+              width: '100%',
+              maxWidth: '460px',
+              padding: '28px 24px',
+              textAlign: 'center',
+              boxShadow: '0 12px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(255, 77, 79, 0.15)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ fontSize: '46px', marginBottom: '14px' }}>🗑️</div>
+            <h3 style={{ color: '#ff4d79', margin: '0 0 12px 0', fontSize: '19px', fontWeight: '800' }}>
+              Xóa Toàn Bộ Nhật Ký Hoạt Động?
+            </h3>
+            <p style={{ color: '#ccc', fontSize: '14px', lineHeight: '1.6', margin: '0 0 16px 0' }}>
+              Bạn có chắc chắn muốn dọn dẹp sạch toàn bộ <strong>{total.toLocaleString()}</strong> bản ghi trong bảng nhật ký (<code>player_logs</code>) không?
+            </p>
+            <div style={{
+              background: 'rgba(255, 77, 79, 0.1)',
+              border: '1px solid rgba(255, 77, 79, 0.25)',
+              borderRadius: '8px',
+              padding: '12px',
+              marginBottom: '22px',
+              fontSize: '12.5px',
+              color: '#ffb3b8',
+              lineHeight: '1.5',
+              textAlign: 'left'
+            }}>
+              💡 <strong>Lưu ý:</strong>
+              <ul style={{ margin: '6px 0 0 0', paddingLeft: '20px' }}>
+                <li>Hành động này sẽ giải phóng dung lượng database và không thể khôi phục lại dữ liệu cũ.</li>
+                <li>Máy chủ game cũng đã được thiết lập tự động làm mới dọn dẹp nhật ký mỗi ngày lúc <strong>00:00:00</strong> và mỗi đợt <strong>Bảo trì máy chủ</strong>.</li>
+              </ul>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+              <button
+                type="button"
+                onClick={() => setShowClearModal(false)}
+                disabled={clearing}
+                className="btn btn-outline"
+                style={{
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  color: '#ccc',
+                  padding: '9px 18px',
+                  borderRadius: '8px',
+                  fontSize: '13.5px',
+                  cursor: clearing ? 'not-allowed' : 'pointer'
+                }}
+              >
+                Hủy Bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleClearLogs}
+                disabled={clearing}
+                style={{
+                  padding: '9px 22px',
+                  background: 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontWeight: 'bold',
+                  fontSize: '13.5px',
+                  cursor: clearing ? 'not-allowed' : 'pointer',
+                  boxShadow: '0 4px 15px rgba(255, 77, 79, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                {clearing ? '⏳ Đang xóa sạch...' : '🔥 Xác nhận xóa sạch'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
