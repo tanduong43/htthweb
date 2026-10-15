@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import api from '../../../api/api';
 
@@ -49,11 +49,7 @@ export default function AdminAuction() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    fetchAuctions();
-  }, [filterStatus]);
-
-  const fetchAuctions = async () => {
+  const fetchAuctions = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get('admin/auctions', {
@@ -71,7 +67,11 @@ export default function AdminAuction() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterStatus, showMessage]);
+
+  useEffect(() => {
+    fetchAuctions();
+  }, [fetchAuctions]);
 
   // Tìm kiếm template khi gõ
   const handleTemplateSearch = async (kw) => {
@@ -213,10 +213,22 @@ export default function AdminAuction() {
         textAlign: 'left'
       }}>
         <div style={{ textAlign: 'left' }}>
-          <h2 style={{ margin: 0, color: '#ff3366', fontSize: '20px', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left' }}>
+          <h2 style={{ 
+            margin: 0, 
+            fontSize: '22px', 
+            fontWeight: 800,
+            background: 'linear-gradient(135deg, #f8fafc 0%, #38bdf8 50%, #00d2ff 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '0.4px',
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '10px', 
+            textAlign: 'left' 
+          }}>
             <span>⚖️</span> Quản Lý Sàn Đấu Giá Bằng Coin
           </h2>
-          <p style={{ margin: '5px 0 0 0', color: '#888', fontSize: '12.5px', textAlign: 'left' }}>
+          <p style={{ margin: '6px 0 0 0', color: '#8294ae', fontSize: '13px', textAlign: 'left' }}>
             Thiết lập danh sách vật phẩm đấu giá trong game theo thời gian thực (đồng bộ trực tiếp với Server)
           </p>
         </div>
@@ -344,17 +356,16 @@ export default function AdminAuction() {
                   textTransform: 'none',
                   letterSpacing: 'normal',
                   boxSizing: 'border-box',
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                   background: isActive 
-                    ? 'linear-gradient(135deg, #ff3366 0%, #ff5e62 100%)' 
+                    ? 'linear-gradient(135deg, #0284c7 0%, #00d2ff 100%)' 
                     : 'rgba(255, 255, 255, 0.04)',
-                  border: isActive ? '1px solid #ff4d79' : '1px solid rgba(255, 255, 255, 0.12)',
-                  color: isActive ? '#ffffff' : '#aaa',
+                  border: isActive ? '1px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.1)',
+                  color: isActive ? '#06101e' : '#8294ae',
                   boxShadow: isActive 
-                    ? '0 0 16px rgba(255, 51, 102, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.25)' 
+                    ? '0 0 16px rgba(0, 210, 255, 0.4)' 
                     : 'none',
-                  outline: isActive ? '2px solid rgba(255, 51, 102, 0.6)' : 'none',
-                  outlineOffset: '2px',
+                  outline: 'none',
                   transform: isActive ? 'scale(1.02)' : 'scale(1)',
                 }}
                 onMouseEnter={(e) => {

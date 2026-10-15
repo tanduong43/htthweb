@@ -206,6 +206,105 @@ const TABLES_CONFIG = {
       { key: 'vnd', label: 'Giá VND / Điểm bán', type: 'number', defaultValue: 0 },
       { key: 'sell', label: 'Bán trong Shop (1: Có, 0: Không)', type: 'number', defaultValue: 0 },
     ]
+  },
+  skill: {
+    label: '⚡ Kỹ Năng / Chiêu Thức (skill)',
+    shortLabel: 'Kỹ Năng (Skill)',
+    primaryKey: ['id'],
+    displayColumns: [
+      { key: 'id', label: 'ID', width: '70px' },
+      { key: 'name', label: 'Tên kỹ năng' },
+      { key: 'icon', label: 'Icon', width: '70px' },
+      { key: 'typeSkill', label: 'Loại', width: '70px' },
+      { key: 'damage', label: 'Sát thương' },
+      { key: 'manaLost', label: 'MP hao' },
+      { key: 'timeDelay', label: 'Hồi chiêu' },
+      { key: 'Lv_RQ', label: 'Level Y/C', width: '80px' },
+    ],
+    fields: [
+      { key: 'id', label: 'ID Kỹ năng (Bắt buộc)', type: 'number', required: true },
+      { key: 'name', label: 'Tên kỹ năng', type: 'text', required: true },
+      { key: 'icon', label: 'Icon ID', type: 'number', defaultValue: 0 },
+      { key: 'id_index', label: 'Index Skill', type: 'number', defaultValue: 0 },
+      { key: 'typeSkill', label: 'Loại kỹ năng (0: Chủ động, 1: Bị động...)', type: 'number', defaultValue: 0 },
+      { key: 'typeBuff', label: 'Loại Buff', type: 'number', defaultValue: 0 },
+      { key: 'damage', label: 'Sát thương cơ bản', type: 'number', defaultValue: 100 },
+      { key: 'manaLost', label: 'MP tiêu hao', type: 'number', defaultValue: 10 },
+      { key: 'timeDelay', label: 'Thời gian hồi chiêu (ms)', type: 'number', defaultValue: 1000 },
+      { key: 'nTarget', label: 'Số mục tiêu', type: 'number', defaultValue: 1 },
+      { key: 'range', label: 'Tầm xa (range)', type: 'number', defaultValue: 100 },
+      { key: 'Lv_RQ', label: 'Cấp độ yêu cầu', type: 'number', defaultValue: 1 },
+      { key: 'info', label: 'Mô tả chiêu thức', type: 'textarea' },
+      { key: 'option', label: 'Thuộc tính thêm (JSON/Chuỗi)', type: 'text', defaultValue: '' },
+    ]
+  },
+  maps: {
+    label: '🗺️ Bản Đồ Thế Giới (maps)',
+    shortLabel: 'Bản Đồ (Maps)',
+    primaryKey: ['id'],
+    displayColumns: [
+      { key: 'id', label: 'ID Map', width: '80px' },
+      { key: 'name', label: 'Tên bản đồ' },
+      { key: 'level', label: 'Cấp độ map', width: '90px' },
+      { key: 'maxzone', label: 'Số khu tối đa', width: '100px' },
+      { key: 'maxplayer', label: 'Số người/khu', width: '100px' },
+      { key: 'boat', label: 'Loại tàu bè', width: '90px' },
+    ],
+    fields: [
+      { key: 'id', label: 'ID Map (Bắt buộc)', type: 'number', required: true },
+      { key: 'name', label: 'Tên bản đồ', type: 'text', required: true },
+      { key: 'level', label: 'Cấp độ yêu cầu', type: 'number', defaultValue: 1 },
+      { key: 'maxzone', label: 'Số khu tối đa', type: 'number', defaultValue: 15 },
+      { key: 'maxplayer', label: 'Số người tối đa mỗi khu', type: 'number', defaultValue: 25 },
+      { key: 'npcs', label: 'NPCs trong Map (JSON)', type: 'text', defaultValue: '[]' },
+      { key: 'mobs', label: 'Quái trong Map (JSON)', type: 'text', defaultValue: '[]' },
+      { key: 'boat', label: 'Cấu hình thuyền (JSON)', type: 'text', defaultValue: '[]' },
+    ]
+  },
+  mobs: {
+    label: '👾 Quái & Quái Tinh Anh (mobs)',
+    shortLabel: 'Quái (Mobs)',
+    primaryKey: ['id'],
+    displayColumns: [
+      { key: 'id', label: 'ID Quái', width: '80px' },
+      { key: 'name', label: 'Tên quái' },
+      { key: 'level', label: 'Cấp độ', width: '80px' },
+      { key: 'hp', label: 'Máu tối đa (HP)' },
+      { key: 'typelive', label: 'Loại sống', width: '90px' },
+      { key: 'isMonster', label: 'Là Boss/Monster', width: '110px' },
+    ],
+    fields: [
+      { key: 'id', label: 'ID Quái (Bắt buộc)', type: 'number', required: true },
+      { key: 'name', label: 'Tên quái', type: 'text', required: true },
+      { key: 'level', label: 'Cấp độ', type: 'number', defaultValue: 1 },
+      { key: 'hp', label: 'Lượng máu (HP)', type: 'number', defaultValue: 1000 },
+      { key: 'typelive', label: 'Loại (0: Thường, 1: Bay, 5: Boss...)', type: 'number', defaultValue: 0 },
+      { key: 'typeMove', label: 'Kiểu di chuyển', type: 'number', defaultValue: 0 },
+      { key: 'isMonster', label: 'Thuộc tính Boss (0: Thường, 1: Tinh anh, 2: Thủ lĩnh)', type: 'number', defaultValue: 0 },
+    ]
+  },
+  boss: {
+    label: '👹 Boss Thế Giới (boss)',
+    shortLabel: 'Boss (Boss)',
+    primaryKey: ['id'],
+    displayColumns: [
+      { key: 'id', label: 'ID Boss', width: '80px' },
+      { key: 'mob_id', label: 'Mob ID', width: '90px' },
+      { key: 'site', label: 'Vị trí tọa độ (Site)' },
+      { key: 'hp', label: 'Lượng HP' },
+      { key: 'level', label: 'Cấp độ', width: '80px' },
+      { key: 'thegioi', label: 'Thế giới', width: '80px' },
+    ],
+    fields: [
+      { key: 'id', label: 'ID Boss (Bắt buộc)', type: 'number', required: true },
+      { key: 'mob_id', label: 'ID Quái gốc (mobs.id)', type: 'number', required: true },
+      { key: 'site', label: 'Vị trí tọa độ (JSON [map, x, y])', type: 'text', defaultValue: '[1, 300, 300]' },
+      { key: 'hp', label: 'Lượng máu Boss', type: 'number', defaultValue: 10000000 },
+      { key: 'skill', label: 'Kỹ năng Boss dùng (JSON)', type: 'text', defaultValue: '[]' },
+      { key: 'buff', label: 'Hiệu ứng Buff (JSON)', type: 'text', defaultValue: '[]' },
+      { key: 'level', label: 'Cấp độ', type: 'number', defaultValue: 99 },
+      { key: 'thegioi', label: 'Thế giới (1, 2, 3...)', type: 'number', defaultValue: 2 },
+    ]
   }
 };
 
@@ -396,13 +495,24 @@ export default function AdminItems() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Header Banner */}
-      <div className="glass-panel" style={{ padding: '20px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+      <div className="glass-panel" style={{ padding: '22px 26px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
         <div>
-          <h2 style={{ color: '#ff3366', margin: 0, fontSize: '22px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <h2 style={{
+            margin: 0,
+            fontSize: '22px',
+            fontWeight: 800,
+            background: 'linear-gradient(135deg, #f8fafc 0%, #38bdf8 50%, #00d2ff 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '0.4px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
             <span>💎</span> QUẢN LÝ VẬT PHẨM & DỮ LIỆU GAME
           </h2>
-          <p style={{ color: '#aaa', margin: '6px 0 0 0', fontSize: '13px' }}>
-            Tra cứu, thêm mới, chỉnh sửa và xóa dữ liệu trực tiếp trong 9 bảng game database.
+          <p style={{ color: '#8294ae', margin: '6px 0 0 0', fontSize: '13.5px' }}>
+            Tra cứu, thêm mới, chỉnh sửa và xóa dữ liệu trực tiếp trong 13 bảng Game Database (Trang bị, Dược phẩm, Thời trang, Pet, Danh hiệu, Kỹ năng, Bản đồ, Quái & Boss).
           </p>
         </div>
         <button
@@ -426,15 +536,15 @@ export default function AdminItems() {
                 onClick={() => handleTabChange(tableKey)}
                 style={{
                   padding: '8px 14px',
-                  borderRadius: '6px',
-                  border: isActive ? '1px solid #ff3366' : '1px solid rgba(255,255,255,0.1)',
-                  background: isActive ? 'linear-gradient(135deg, #ff3366 0%, #ff527b 100%)' : 'rgba(255,255,255,0.03)',
-                  color: isActive ? '#fff' : '#bbb',
+                  borderRadius: '8px',
+                  border: isActive ? '1px solid #00d2ff' : '1px solid rgba(255,255,255,0.08)',
+                  background: isActive ? 'linear-gradient(135deg, #0284c7 0%, #00d2ff 100%)' : 'rgba(255,255,255,0.03)',
+                  color: isActive ? '#06101e' : '#8294ae',
                   fontSize: '13px',
-                  fontWeight: isActive ? 'bold' : 'normal',
+                  fontWeight: isActive ? '700' : '500',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
-                  boxShadow: isActive ? '0 2px 8px rgba(255,51,102,0.4)' : 'none'
+                  boxShadow: isActive ? '0 2px 10px rgba(0, 210, 255, 0.35)' : 'none'
                 }}
               >
                 {cfg.label}
@@ -505,7 +615,7 @@ export default function AdminItems() {
           </div>
         ) : loading ? (
           /* Loading State */
-          <div style={{ textAlign: 'center', padding: '60px 20px', color: '#ff3366' }}>
+          <div style={{ textAlign: 'center', padding: '60px 20px', color: '#00d2ff' }}>
             <div className="loader" style={{ margin: '0 auto 15px auto' }}></div>
             <p style={{ margin: 0, fontSize: '14px' }}>Đang tìm kiếm dữ liệu trong bảng {activeTable}...</p>
           </div>
@@ -513,7 +623,7 @@ export default function AdminItems() {
           /* No Results Found */
           <div style={{ textAlign: 'center', padding: '60px 20px', color: '#888' }}>
             <div style={{ fontSize: '42px', marginBottom: '15px' }}>❌</div>
-            <h3 style={{ color: '#ff4d79', margin: '0 0 8px 0', fontSize: '17px' }}>Không tìm thấy kết quả phù hợp!</h3>
+            <h3 style={{ color: '#f43f5e', margin: '0 0 8px 0', fontSize: '17px' }}>Không tìm thấy kết quả phù hợp!</h3>
             <p style={{ margin: 0, fontSize: '13px', color: '#777' }}>
               Không có vật phẩm nào khớp với từ khóa "<strong>{keyword}</strong>" trong bảng <code>{activeTable}</code>.
             </p>
@@ -522,11 +632,11 @@ export default function AdminItems() {
           /* Search Results Table */
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-              <span style={{ color: '#aaa', fontSize: '14px' }}>
-                Tìm thấy <strong style={{ color: '#ff3366' }}>{total}</strong> kết quả cho "<strong>{keyword}</strong>"
+              <span style={{ color: '#cbd5e1', fontSize: '14px' }}>
+                Tìm thấy <strong style={{ color: '#00d2ff' }}>{total}</strong> kết quả cho "<strong>{keyword}</strong>"
               </span>
-              <span style={{ color: '#777', fontSize: '13px' }}>
-                Trang {page} / {totalPages}
+              <span style={{ color: '#8294ae', fontSize: '13px' }}>
+                Trang <strong style={{ color: '#00d2ff' }}>{page}</strong> / {totalPages}
               </span>
             </div>
 

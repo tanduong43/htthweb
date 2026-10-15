@@ -24,6 +24,8 @@ const AdminBanking = lazy(() => import('../features/admin/components/AdminBankin
 const AdminItems = lazy(() => import('../features/admin/components/AdminItems'));
 const AdminLogs = lazy(() => import('../features/admin/components/AdminLogs'));
 const AdminAuction = lazy(() => import('../features/admin/components/AdminAuction'));
+const AdminAuditLogs = lazy(() => import('../features/admin/components/AdminAuditLogs'));
+const AdminAntiCheat = lazy(() => import('../features/admin/components/AdminAntiCheat'));
 
 const PageSuspense = ({ children }) => (
   <Suspense
@@ -38,7 +40,7 @@ const PageSuspense = ({ children }) => (
   </Suspense>
 );
 
-export const routes = [
+const routes = [
   { path: '/', element: <PageSuspense><HomePage /></PageSuspense> },
   { path: '/tai-khoan', element: <PageSuspense><AccountPage /></PageSuspense> },
   { path: '/nap-tien', element: <PageSuspense><TopupPage /></PageSuspense> },
@@ -59,6 +61,8 @@ export const routes = [
       { path: 'banking', element: <PageSuspense><AdminBanking /></PageSuspense> },
       { path: 'logs', element: <PageSuspense><AdminLogs /></PageSuspense> },
       { path: 'auctions', element: <PageSuspense><AdminAuction /></PageSuspense> },
+      { path: 'audit-logs', element: <PageSuspense><AdminAuditLogs /></PageSuspense> },
+      { path: 'anti-cheat', element: <PageSuspense><AdminAntiCheat /></PageSuspense> },
     ],
   },
 ];

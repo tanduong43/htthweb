@@ -145,7 +145,7 @@ export function SocketProvider({ children }) {
     return () => {
       socketInstance.disconnect();
     };
-  }, []);
+  }, [setUser]);
 
   // Re-emit join room whenever user logs in or reconnects
   useEffect(() => {

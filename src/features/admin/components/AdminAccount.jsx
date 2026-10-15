@@ -667,21 +667,20 @@ function AdminAccount() {
 
   return (
     <div style={{ 
-      maxWidth: '1000px', 
+      maxWidth: '1200px', 
       margin: '0 auto', 
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      color: '#eee',
-      padding: '20px'
+      color: '#e2e8f0',
+      padding: '10px 0'
     }}>
       <h3 style={{ 
-        color: '#ff3366', 
         marginBottom: '24px', 
         textAlign: 'center',
         fontSize: '24px',
         fontWeight: '800',
         textTransform: 'uppercase',
-        letterSpacing: '1px',
-        background: 'linear-gradient(135deg, #ff3366 0%, #ff5e62 100%)',
+        letterSpacing: '0.8px',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #38bdf8 50%, #00d2ff 100%)',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
       }}>
@@ -691,8 +690,8 @@ function AdminAccount() {
       {/* Stats Cards */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: '20px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gap: '16px',
         marginBottom: '24px'
       }}>
         {/* Total Accounts */}
@@ -700,18 +699,18 @@ function AdminAccount() {
           onClick={handleCardClickAll}
           title="Nhấn để xem toàn bộ tài khoản"
           style={{
-            background: 'linear-gradient(135deg, rgba(20,20,20,0.8) 0%, rgba(30,30,30,0.8) 100%)',
-            backdropFilter: 'blur(10px)',
+            background: 'rgba(17, 29, 56, 0.75)',
+            backdropFilter: 'blur(12px)',
             border: (onlineFilter === 'all' && statusFilter === 'all' && lockFilter === 'all' && !searchQuery)
-              ? '1.5px solid rgba(52, 152, 219, 0.8)' 
-              : '1px solid rgba(255,255,255,0.05)',
-            borderRadius: '16px',
-            padding: '24px',
+              ? '1.5px solid #00d2ff' 
+              : '1px solid rgba(0, 210, 255, 0.12)',
+            borderRadius: '14px',
+            padding: '20px',
             display: 'flex',
             alignItems: 'center',
             boxShadow: (onlineFilter === 'all' && statusFilter === 'all' && lockFilter === 'all' && !searchQuery)
-              ? '0 8px 32px rgba(52, 152, 219, 0.25)' 
-              : '0 8px 32px rgba(0,0,0,0.2)',
+              ? '0 8px 24px rgba(0, 210, 255, 0.25)' 
+              : '0 8px 24px -4px rgba(2, 6, 23, 0.5)',
             position: 'relative',
             overflow: 'hidden',
             cursor: 'pointer',
@@ -747,19 +746,19 @@ function AdminAccount() {
           title="Nhấn để lọc danh sách tài khoản đang Online"
           style={{
             background: onlineFilter === 'online' 
-              ? 'linear-gradient(135deg, rgba(46, 204, 113, 0.18) 0%, rgba(20,20,20,0.9) 100%)' 
-              : 'linear-gradient(135deg, rgba(20,20,20,0.8) 0%, rgba(30,30,30,0.8) 100%)',
-            backdropFilter: 'blur(10px)',
+              ? 'linear-gradient(135deg, rgba(46, 204, 113, 0.2) 0%, rgba(17, 29, 56, 0.95) 100%)' 
+              : 'rgba(17, 29, 56, 0.75)',
+            backdropFilter: 'blur(12px)',
             border: onlineFilter === 'online' 
               ? '1.5px solid #2ecc71' 
-              : '1px solid rgba(255,255,255,0.05)',
-            borderRadius: '16px',
-            padding: '24px',
+              : '1px solid rgba(0, 210, 255, 0.12)',
+            borderRadius: '14px',
+            padding: '20px',
             display: 'flex',
             alignItems: 'center',
             boxShadow: onlineFilter === 'online' 
-              ? '0 8px 32px rgba(46, 204, 113, 0.35)' 
-              : '0 8px 32px rgba(0,0,0,0.2)',
+              ? '0 8px 24px rgba(46, 204, 113, 0.3)' 
+              : '0 8px 24px -4px rgba(2, 6, 23, 0.5)',
             position: 'relative',
             overflow: 'hidden',
             cursor: 'pointer',
@@ -770,20 +769,20 @@ function AdminAccount() {
         >
           <div style={{
             background: 'rgba(46, 204, 113, 0.15)',
-            width: '60px',
-            height: '60px',
-            borderRadius: '16px',
+            width: '54px',
+            height: '54px',
+            borderRadius: '14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '28px',
-            marginRight: '20px',
+            fontSize: '24px',
+            marginRight: '16px',
             border: '1px solid rgba(46, 204, 113, 0.3)'
           }}>
             🟢
           </div>
           <div>
-            <div style={{ fontSize: '14px', color: '#aaa', fontWeight: '600', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ fontSize: '13px', color: '#8294ae', fontWeight: '700', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>Đang Online</span>
               {onlineFilter === 'online' && (
                 <span style={{ fontSize: '11px', color: '#2ecc71', fontWeight: 'bold', background: 'rgba(46,204,113,0.15)', padding: '1px 6px', borderRadius: '4px', border: '1px solid rgba(46,204,113,0.3)' }}>
@@ -791,9 +790,9 @@ function AdminAccount() {
                 </span>
               )}
             </div>
-            <div style={{ fontSize: '28px', fontWeight: '800', color: onlineFilter === 'online' ? '#2ecc71' : '#fff' }}>{totalOnline.toLocaleString()}</div>
+            <div style={{ fontSize: '24px', fontWeight: '800', color: onlineFilter === 'online' ? '#2ecc71' : '#fff' }}>{totalOnline.toLocaleString()}</div>
           </div>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '80px', opacity: 0.05 }}>🟢</div>
+          <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '80px', opacity: 0.04 }}>🟢</div>
         </div>
 
         {/* Total Members */}
@@ -802,19 +801,19 @@ function AdminAccount() {
           title="Nhấn để lọc danh sách tài khoản đã kích hoạt (MTV)"
           style={{
             background: statusFilter === 'active' 
-              ? 'linear-gradient(135deg, rgba(241, 196, 15, 0.18) 0%, rgba(20,20,20,0.9) 100%)' 
-              : 'linear-gradient(135deg, rgba(20,20,20,0.8) 0%, rgba(30,30,30,0.8) 100%)',
-            backdropFilter: 'blur(10px)',
+              ? 'linear-gradient(135deg, rgba(241, 196, 15, 0.2) 0%, rgba(17, 29, 56, 0.95) 100%)' 
+              : 'rgba(17, 29, 56, 0.75)',
+            backdropFilter: 'blur(12px)',
             border: statusFilter === 'active' 
               ? '1.5px solid #f1c40f' 
-              : '1px solid rgba(255,255,255,0.05)',
-            borderRadius: '16px',
-            padding: '24px',
+              : '1px solid rgba(0, 210, 255, 0.12)',
+            borderRadius: '14px',
+            padding: '20px',
             display: 'flex',
             alignItems: 'center',
             boxShadow: statusFilter === 'active' 
-              ? '0 8px 32px rgba(241, 196, 15, 0.35)' 
-              : '0 8px 32px rgba(0,0,0,0.2)',
+              ? '0 8px 24px rgba(241, 196, 15, 0.3)' 
+              : '0 8px 24px -4px rgba(2, 6, 23, 0.5)',
             position: 'relative',
             overflow: 'hidden',
             cursor: 'pointer',
@@ -825,20 +824,20 @@ function AdminAccount() {
         >
           <div style={{
             background: 'rgba(241, 196, 15, 0.15)',
-            width: '60px',
-            height: '60px',
-            borderRadius: '16px',
+            width: '54px',
+            height: '54px',
+            borderRadius: '14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '28px',
-            marginRight: '20px',
+            fontSize: '24px',
+            marginRight: '16px',
             border: '1px solid rgba(241, 196, 15, 0.3)'
           }}>
             👑
           </div>
           <div>
-            <div style={{ fontSize: '14px', color: '#aaa', fontWeight: '600', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ fontSize: '13px', color: '#8294ae', fontWeight: '700', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>Mở Thành Viên</span>
               {statusFilter === 'active' && (
                 <span style={{ fontSize: '11px', color: '#f1c40f', fontWeight: 'bold', background: 'rgba(241,196,15,0.15)', padding: '1px 6px', borderRadius: '4px', border: '1px solid rgba(241,196,15,0.3)' }}>
@@ -846,9 +845,9 @@ function AdminAccount() {
                 </span>
               )}
             </div>
-            <div style={{ fontSize: '28px', fontWeight: '800', color: statusFilter === 'active' ? '#ffd700' : '#fff' }}>{totalMembers.toLocaleString()}</div>
+            <div style={{ fontSize: '24px', fontWeight: '800', color: statusFilter === 'active' ? '#ffd700' : '#fff' }}>{totalMembers.toLocaleString()}</div>
           </div>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '80px', opacity: 0.05 }}>👑</div>
+          <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '80px', opacity: 0.04 }}>👑</div>
         </div>
 
         {/* Total Offline > 15 Days */}
@@ -857,19 +856,19 @@ function AdminAccount() {
           title="Nhấn để lọc danh sách tài khoản đã Offline hơn 15 ngày (Clone)"
           style={{
             background: offlineFilter === '15' 
-              ? 'linear-gradient(135deg, rgba(255, 77, 79, 0.22) 0%, rgba(20,20,20,0.9) 100%)' 
-              : 'linear-gradient(135deg, rgba(20,20,20,0.8) 0%, rgba(30,30,30,0.8) 100%)',
-            backdropFilter: 'blur(10px)',
+              ? 'linear-gradient(135deg, rgba(255, 77, 79, 0.22) 0%, rgba(17, 29, 56, 0.95) 100%)' 
+              : 'rgba(17, 29, 56, 0.75)',
+            backdropFilter: 'blur(12px)',
             border: offlineFilter === '15' 
               ? '1.5px solid #ff4d4f' 
-              : '1px solid rgba(255,255,255,0.05)',
-            borderRadius: '16px',
-            padding: '24px',
+              : '1px solid rgba(0, 210, 255, 0.12)',
+            borderRadius: '14px',
+            padding: '20px',
             display: 'flex',
             alignItems: 'center',
             boxShadow: offlineFilter === '15' 
-              ? '0 8px 32px rgba(255, 77, 79, 0.35)' 
-              : '0 8px 32px rgba(0,0,0,0.2)',
+              ? '0 8px 24px rgba(255, 77, 79, 0.3)' 
+              : '0 8px 24px -4px rgba(2, 6, 23, 0.5)',
             position: 'relative',
             overflow: 'hidden',
             cursor: 'pointer',
@@ -957,12 +956,12 @@ function AdminAccount() {
         gap: '16px',
         flexWrap: 'wrap',
         marginBottom: '24px',
-        background: 'rgba(20, 20, 20, 0.75)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        background: 'rgba(17, 29, 56, 0.75)',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(0, 210, 255, 0.12)',
         borderRadius: '12px',
         padding: '20px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+        boxShadow: '0 8px 24px -4px rgba(2, 6, 23, 0.5)'
       }}>
         <div style={{ flex: '2 1 200px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', color: '#aaa', fontWeight: '600' }}>Tìm kiếm:</label>
@@ -1110,12 +1109,12 @@ function AdminAccount() {
       </div>
 
       <div style={{
-        background: 'rgba(20, 20, 20, 0.75)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: '16px',
+        background: 'rgba(17, 29, 56, 0.75)',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(0, 210, 255, 0.12)',
+        borderRadius: '14px',
         padding: '24px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+        boxShadow: '0 8px 24px -4px rgba(2, 6, 23, 0.5)'
       }}>
         <div style={{
           display: 'flex',
@@ -4303,7 +4302,7 @@ function AdminAccount() {
                       } catch {
                         // ignore
                       }
-                      const cleaned = c.replace(/[\[\]"']/g, '').trim();
+                      const cleaned = c.replace(/[[\]"']/g, '').trim();
                       return cleaned || 'Chưa tạo nhân vật';
                     }
                     return String(c);

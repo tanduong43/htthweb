@@ -64,43 +64,105 @@ export default function AdminDashboard() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
       {/* Welcome Header */}
-      <div className="glass-panel" style={{ padding: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+      <div className="glass-panel" style={{ padding: '22px 26px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
         <div>
-          <h2 style={{ color: '#ff3366', margin: 0, fontSize: '24px' }}>Xin chào, {user?.username}! ⚓</h2>
-          <p style={{ color: '#aaa', margin: '5px 0 0 0', fontSize: '14px' }}>Chào mừng bạn trở lại hệ thống quản trị Thế Giới Hải Tặc.</p>
+          <h2 style={{
+            margin: 0,
+            fontSize: '22px',
+            fontWeight: 800,
+            background: 'linear-gradient(135deg, #f8fafc 0%, #38bdf8 50%, #00d2ff 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '0.4px'
+          }}>
+            Xin chào, {user?.username}! ⚡
+          </h2>
+          <p style={{ color: '#8294ae', margin: '5px 0 0 0', fontSize: '13.5px' }}>Chào mừng bạn trở lại trung tâm chỉ huy hệ thống quản trị.</p>
         </div>
-        <button onClick={() => window.location.reload()} className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.15)', color: '#ccc' }}>🔄 Làm mới thống kê</button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <Link
+            to="/admin/anti-cheat"
+            className="btn"
+            style={{
+              background: 'rgba(239, 68, 68, 0.15)',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              color: '#ef4444',
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontWeight: 700,
+              fontSize: '13px',
+              padding: '9px 16px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px rgba(239, 68, 68, 0.2)'
+            }}
+          >
+            🛡️ Radar Chống Hack / Dupe
+          </Link>
+          <button onClick={() => window.location.reload()} className="btn btn-outline" style={{ padding: '9px 16px', borderRadius: '8px' }}>
+            🔄 Làm mới thống kê
+          </button>
+        </div>
       </div>
 
       {/* Numerical Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '16px' }}>
         <StatCard 
-          title="Tổng Tiền Nạp" 
+          title="Tổng Tài Khoản" 
+          value={(stats?.totalAccounts || 0).toLocaleString()} 
+          color="#38bdf8" 
+          icon="👥" 
+          bg="linear-gradient(135deg, rgba(56,189,248,0.15) 0%, rgba(0,0,0,0) 100%)" 
+        />
+        <StatCard 
+          title="Đang Online" 
+          value={(stats?.totalOnline || 0).toLocaleString()} 
+          color="#4ade80" 
+          icon="🟢" 
+          bg="linear-gradient(135deg, rgba(74,222,128,0.15) 0%, rgba(0,0,0,0) 100%)" 
+        />
+        <StatCard 
+          title="Tổng Nhân Vật" 
+          value={(stats?.totalCharacters || 0).toLocaleString()} 
+          color="#a78bfa" 
+          icon="⚔️" 
+          bg="linear-gradient(135deg, rgba(167,139,250,0.15) 0%, rgba(0,0,0,0) 100%)" 
+        />
+        <StatCard 
+          title="Nạp Hôm Nay" 
+          value={`${(stats?.todayRecharged || 0).toLocaleString()}đ`} 
+          color="#fbbf24" 
+          icon="⚡" 
+          bg="linear-gradient(135deg, rgba(251,191,36,0.15) 0%, rgba(0,0,0,0) 100%)" 
+        />
+        <StatCard 
+          title="Tổng Doanh Thu Nạp" 
           value={`${(stats?.totalRecharged || 0).toLocaleString()}đ`} 
-          color="#52c41a" 
+          color="#10b981" 
           icon="💰" 
-          bg="linear-gradient(135deg, rgba(82,196,26,0.15) 0%, rgba(0,0,0,0) 100%)" 
+          bg="linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(0,0,0,0) 100%)" 
         />
         <StatCard 
           title="Tổng Giao Dịch" 
-          value={stats?.totalTxns || 0} 
-          color="#1890ff" 
+          value={(stats?.totalTxns || 0).toLocaleString()} 
+          color="#60a5fa" 
           icon="📊" 
-          bg="linear-gradient(135deg, rgba(24,144,255,0.15) 0%, rgba(0,0,0,0) 100%)" 
+          bg="linear-gradient(135deg, rgba(96,165,250,0.15) 0%, rgba(0,0,0,0) 100%)" 
         />
         <StatCard 
           title="Giao Dịch Thành Công" 
-          value={(stats?.successTxns || 0)} 
-          color="#52c41a" 
+          value={(stats?.successTxns || 0).toLocaleString()} 
+          color="#34d399" 
           icon="✅" 
-          bg="linear-gradient(135deg, rgba(82,196,26,0.1) 0%, rgba(0,0,0,0) 100%)" 
+          bg="linear-gradient(135deg, rgba(52,211,153,0.15) 0%, rgba(0,0,0,0) 100%)" 
         />
         <StatCard 
-          title="Giao Dịch Lỗi" 
-          value={stats?.failedTxns || 0} 
-          color="#f5222d" 
-          icon="❌" 
-          bg="linear-gradient(135deg, rgba(245,34,45,0.1) 0%, rgba(0,0,0,0) 100%)" 
+          title="Chờ Duyệt / Lỗi" 
+          value={`${stats?.pendingTxns || 0} / ${stats?.failedTxns || 0}`} 
+          color="#f87171" 
+          icon="⚠️" 
+          bg="linear-gradient(135deg, rgba(248,113,113,0.15) 0%, rgba(0,0,0,0) 100%)" 
         />
       </div>
 
@@ -225,17 +287,18 @@ export default function AdminDashboard() {
 
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
             {/* View Mode Toggle */}
-            <div style={{ display: 'inline-flex', background: 'rgba(0,0,0,0.4)', borderRadius: '8px', padding: '3px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ display: 'inline-flex', background: 'rgba(9, 14, 28, 0.7)', borderRadius: '10px', padding: '4px', border: '1px solid rgba(0, 210, 255, 0.15)' }}>
               <button
                 onClick={() => setWealthViewMode('tabs')}
                 style={{
-                  padding: '6px 14px',
-                  borderRadius: '6px',
+                  padding: '7px 16px',
+                  borderRadius: '7px',
                   border: 'none',
                   fontSize: '13px',
-                  fontWeight: wealthViewMode === 'tabs' ? 'bold' : 'normal',
-                  color: wealthViewMode === 'tabs' ? '#fff' : '#888',
-                  background: wealthViewMode === 'tabs' ? 'rgba(255,51,102,0.6)' : 'transparent',
+                  fontWeight: wealthViewMode === 'tabs' ? '700' : '500',
+                  color: wealthViewMode === 'tabs' ? '#06101e' : '#8294ae',
+                  background: wealthViewMode === 'tabs' ? 'linear-gradient(135deg, #0284c7 0%, #00d2ff 100%)' : 'transparent',
+                  boxShadow: wealthViewMode === 'tabs' ? '0 2px 10px rgba(0, 210, 255, 0.3)' : 'none',
                   cursor: 'pointer',
                   transition: 'all 0.2s'
                 }}
@@ -245,13 +308,14 @@ export default function AdminDashboard() {
               <button
                 onClick={() => setWealthViewMode('grid')}
                 style={{
-                  padding: '6px 14px',
-                  borderRadius: '6px',
+                  padding: '7px 16px',
+                  borderRadius: '7px',
                   border: 'none',
                   fontSize: '13px',
-                  fontWeight: wealthViewMode === 'grid' ? 'bold' : 'normal',
-                  color: wealthViewMode === 'grid' ? '#fff' : '#888',
-                  background: wealthViewMode === 'grid' ? 'rgba(255,51,102,0.6)' : 'transparent',
+                  fontWeight: wealthViewMode === 'grid' ? '700' : '500',
+                  color: wealthViewMode === 'grid' ? '#06101e' : '#8294ae',
+                  background: wealthViewMode === 'grid' ? 'linear-gradient(135deg, #0284c7 0%, #00d2ff 100%)' : 'transparent',
+                  boxShadow: wealthViewMode === 'grid' ? '0 2px 10px rgba(0, 210, 255, 0.3)' : 'none',
                   cursor: 'pointer',
                   transition: 'all 0.2s'
                 }}
@@ -509,25 +573,53 @@ function WealthTable({ category, data, isSingleTab }) {
   );
 }
 
-function StatCard({ title, value, color, icon, bg }) {
+function StatCard({ title, value, color, icon }) {
   return (
-    <div style={{ 
-      background: bg || 'rgba(0,0,0,0.3)', 
-      border: '1px solid rgba(255,255,255,0.08)', 
-      borderRadius: '10px', 
-      padding: '20px',
-      position: 'relative',
-      overflow: 'hidden',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-    }}>
+    <div 
+      style={{ 
+        background: 'rgba(17, 29, 56, 0.75)', 
+        border: '1px solid rgba(0, 210, 255, 0.12)', 
+        borderRadius: '12px', 
+        padding: '18px 20px',
+        position: 'relative',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        boxShadow: '0 8px 24px -4px rgba(2, 6, 23, 0.5)',
+        backdropFilter: 'blur(10px)',
+        transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-3px)';
+        e.currentTarget.style.borderColor = color || '#00d2ff';
+        e.currentTarget.style.boxShadow = `0 12px 28px -4px rgba(0,0,0,0.6), 0 0 16px ${color}33`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.borderColor = 'rgba(0, 210, 255, 0.12)';
+        e.currentTarget.style.boxShadow = '0 8px 24px -4px rgba(2, 6, 23, 0.5)';
+      }}
+    >
       <div>
-        <span style={{ color: '#888', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{title}</span>
-        <h2 style={{ color: '#fff', fontSize: '24px', margin: '5px 0 0 0', fontWeight: 'bold' }}>{value}</h2>
+        <span style={{ color: '#8294ae', fontSize: '11.5px', textTransform: 'uppercase', letterSpacing: '0.6px', fontWeight: '700' }}>{title}</span>
+        <h2 style={{ color: '#f8fafc', fontSize: '22px', margin: '6px 0 0 0', fontWeight: '800', letterSpacing: '0.3px' }}>{value}</h2>
       </div>
-      <div style={{ fontSize: '32px', opacity: 0.8, color: color }}>{icon}</div>
+      <div style={{
+        width: '46px',
+        height: '46px',
+        borderRadius: '12px',
+        background: `${color}18`,
+        border: `1px solid ${color}40`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '22px',
+        color: color,
+        boxShadow: `0 0 12px ${color}20`
+      }}>
+        {icon}
+      </div>
     </div>
   );
 }
@@ -536,29 +628,31 @@ function DashboardCard({ title, desc, icon, link }) {
   return (
     <Link to={link} style={{ textDecoration: 'none' }}>
       <div style={{ 
-        background: 'rgba(255,255,255,0.02)', 
-        border: '1px solid rgba(255,255,255,0.08)', 
-        borderRadius: '8px', 
-        padding: '20px', 
+        background: 'rgba(17, 29, 56, 0.5)', 
+        border: '1px solid rgba(255, 255, 255, 0.08)', 
+        borderRadius: '10px', 
+        padding: '22px 18px', 
         textAlign: 'center',
-        transition: 'all 0.3s',
+        transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
         cursor: 'pointer'
       }}
       className="nav-card"
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-3px)';
-        e.currentTarget.style.borderColor = '#ff3366';
-        e.currentTarget.style.background = 'rgba(255, 51, 102, 0.05)';
+        e.currentTarget.style.borderColor = '#00d2ff';
+        e.currentTarget.style.background = 'rgba(0, 210, 255, 0.06)';
+        e.currentTarget.style.boxShadow = '0 10px 25px -4px rgba(0, 210, 255, 0.2)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-        e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+        e.currentTarget.style.background = 'rgba(17, 29, 56, 0.5)';
+        e.currentTarget.style.boxShadow = 'none';
       }}
       >
-        <div style={{ fontSize: '30px', marginBottom: '10px' }}>{icon}</div>
-        <h3 style={{ color: '#fff', marginBottom: '10px', fontSize: '16px' }}>{title}</h3>
-        <p style={{ color: '#aaa', fontSize: '12px', margin: 0 }}>{desc}</p>
+        <div style={{ fontSize: '32px', marginBottom: '10px' }}>{icon}</div>
+        <h3 style={{ color: '#f8fafc', marginBottom: '8px', fontSize: '15px', fontWeight: '700' }}>{title}</h3>
+        <p style={{ color: '#8294ae', fontSize: '12px', margin: 0, lineHeight: 1.4 }}>{desc}</p>
       </div>
     </Link>
   );

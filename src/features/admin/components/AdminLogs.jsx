@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import api from '../../../api/api';
 
@@ -29,9 +29,12 @@ export default function AdminLogs() {
   });
   
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const [limit] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
 
   // Trạng thái Bật/Tắt ghi nhật ký & Xóa nhật ký
   const [loggingEnabled, setLoggingEnabled] = useState(true);
@@ -51,7 +54,7 @@ export default function AdminLogs() {
     }
   }, []);
 
-  const fetchLogs = useCallback(async (currentPage = page, currentLimit = limit, currentFilters = filters) => {
+  const fetchLogs = useCallback(async (currentPage = page, currentLimit = limit, currentFilters = filtersRef.current) => {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams({
@@ -78,15 +81,15 @@ export default function AdminLogs() {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, filters, showMessage]);
+  }, [page, limit, showMessage]);
 
   useEffect(() => {
     fetchSettings();
   }, [fetchSettings]);
 
   useEffect(() => {
-    fetchLogs(page, limit, filters);
-  }, [page, limit]);
+    fetchLogs(page, limit);
+  }, [fetchLogs, page, limit]);
 
   // Bật/Tắt ghi log
   const handleToggleLogging = async () => {
@@ -235,11 +238,11 @@ export default function AdminLogs() {
         <div>
           <h2 style={{
             margin: 0,
-            fontSize: '24px',
+            fontSize: '22px',
             fontWeight: '800',
             textTransform: 'uppercase',
-            letterSpacing: '1px',
-            background: 'linear-gradient(135deg, #ff3366 0%, #ff5e62 100%)',
+            letterSpacing: '0.8px',
+            background: 'linear-gradient(135deg, #f8fafc 0%, #38bdf8 50%, #00d2ff 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             display: 'flex',
@@ -248,7 +251,7 @@ export default function AdminLogs() {
           }}>
             📜 LỊCH SỬ NGƯỜI CHƠI
           </h2>
-          <p style={{ color: '#aaa', margin: '6px 0 0 0', fontSize: '13.5px' }}>
+          <p style={{ color: '#8294ae', margin: '6px 0 0 0', fontSize: '13.5px' }}>
             Tra cứu và giám sát chi tiết hành động người chơi: Đăng bán & mua đồ ở chợ, Tiêu Ruby, Nhận Beri.
           </p>
         </div>
@@ -812,7 +815,7 @@ export default function AdminLogs() {
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ fontSize: '46px', marginBottom: '14px' }}>🗑️</div>
-            <h3 style={{ color: '#ff4d79', margin: '0 0 12px 0', fontSize: '19px', fontWeight: '800' }}>
+            <h3 style={{ color: '#f43f5e', margin: '0 0 12px 0', fontSize: '19px', fontWeight: '800' }}>
               Xóa Toàn Bộ Nhật Ký Hoạt Động?
             </h3>
             <p style={{ color: '#ccc', fontSize: '14px', lineHeight: '1.6', margin: '0 0 16px 0' }}>

@@ -6,59 +6,62 @@ const styles = {
   formContainer: {
     maxWidth: '420px',
     margin: '40px auto',
-    padding: '30px',
-    background: 'rgba(26, 26, 26, 0.6)',
-    border: '1px solid #333',
-    borderRadius: '16px',
-    boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.4)',
-    fontFamily: '"Times New Roman", Times, serif',
-    color: '#fff',
-    backdropFilter: 'blur(8px)',
+    padding: '28px',
+    background: 'rgba(17, 29, 56, 0.75)',
+    border: '1px solid rgba(0, 210, 255, 0.14)',
+    borderRadius: '14px',
+    boxShadow: '0 8px 24px -4px rgba(2, 6, 23, 0.5)',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif',
+    color: '#e2e8f0',
+    backdropFilter: 'blur(12px)',
+    transition: 'all 0.25s ease',
   },
   title: {
-    color: '#ff3366',
-    marginBottom: '25px',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #38bdf8 50%, #00d2ff 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    marginBottom: '22px',
     textAlign: 'center',
-    fontSize: '20px',
-    fontWeight: '700',
+    fontSize: '19px',
+    fontWeight: '800',
     textTransform: 'uppercase',
-    letterSpacing: '1px'
+    letterSpacing: '0.8px'
   },
   formGroup: {
-    marginBottom: '20px',
+    marginBottom: '18px',
   },
   label: {
     display: 'block',
     marginBottom: '8px',
     fontWeight: '600',
     textAlign: 'left',
-    color: '#aaa',
+    color: '#8294ae',
     fontSize: '13px'
   },
   input: {
     width: '100%',
-    padding: '12px 14px',
+    padding: '11px 14px',
     borderRadius: '8px',
-    border: '1px solid #444',
-    backgroundColor: '#111',
-    color: '#fff',
+    border: '1px solid #1e2f52',
+    backgroundColor: '#090e1c',
+    color: '#f8fafc',
     boxSizing: 'border-box',
     fontSize: '14px',
     outline: 'none',
-    transition: 'all 0.3s ease',
+    transition: 'all 0.2s ease',
   },
   btnSubmit: {
     width: '100%',
     padding: '12px',
-    backgroundColor: '#ff3366',
-    color: '#fff',
+    background: 'linear-gradient(135deg, #0284c7 0%, #00d2ff 100%)',
+    color: '#06101e',
     border: 'none',
     borderRadius: '8px',
     fontWeight: '700',
-    fontSize: '15px',
+    fontSize: '14.5px',
     cursor: 'pointer',
-    boxShadow: '0 4px 12px rgba(255, 51, 102, 0.25)',
-    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 14px rgba(0, 210, 255, 0.3)',
+    transition: 'all 0.2s ease',
     marginTop: '10px'
   }
 };
@@ -169,8 +172,8 @@ function AdminCoin() {
             required
             style={{
               ...styles.input,
-              borderColor: focusField === 'username' ? '#ff3366' : '#444',
-              boxShadow: focusField === 'username' ? '0 0 0 2px rgba(255, 51, 102, 0.2)' : 'none'
+              borderColor: focusField === 'username' ? '#00d2ff' : '#1e2f52',
+              boxShadow: focusField === 'username' ? '0 0 0 3px rgba(0, 210, 255, 0.2)' : 'none'
             }}
           />
         </div>
@@ -188,19 +191,19 @@ function AdminCoin() {
             min="1"
             style={{
               ...styles.input,
-              borderColor: focusField === 'amount' ? '#ff3366' : '#444',
-              boxShadow: focusField === 'amount' ? '0 0 0 2px rgba(255, 51, 102, 0.2)' : 'none'
+              borderColor: focusField === 'amount' ? '#00d2ff' : '#1e2f52',
+              boxShadow: focusField === 'amount' ? '0 0 0 3px rgba(0, 210, 255, 0.2)' : 'none'
             }}
           />
         </div>
 
         <div style={{ marginBottom: '18px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#eee' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#e2e8f0' }}>
             <input
               type="checkbox"
               checked={isDeposit}
               onChange={(e) => setIsDeposit(e.target.checked)}
-              style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#ff3366' }}
+              style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#00d2ff' }}
             />
             <span>⚡ Tính là Nạp tiền (Tăng Tích Nạp & VIP)</span>
           </label>
@@ -209,8 +212,8 @@ function AdminCoin() {
         <button 
           type="submit" 
           style={styles.btnSubmit}
-          onMouseOver={(e) => e.target.style.backgroundColor = '#e62e5c'}
-          onMouseOut={(e) => e.target.style.backgroundColor = '#ff3366'}
+          onMouseOver={(e) => e.target.style.filter = 'brightness(1.1)'}
+          onMouseOut={(e) => e.target.style.filter = 'none'}
         >
           Xác Nhận Cộng
         </button>

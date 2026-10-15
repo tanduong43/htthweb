@@ -84,4 +84,68 @@
   --secondary-hover: var(--crimson-hover);
   --glass-bg: var(--bg-card);
   --glass-border: var(--border-glass);
+
+  /* ======================================================== */
+  /*            MODERN DASHBOARD UI TOKENS (ADMIN)            */
+  /* ======================================================== */
+  --admin-bg-base: #080d1a;
+  --admin-bg-base-alt: #0b1222;
+  --admin-bg-sidebar: #0c1427;
+  --admin-bg-header: rgba(12, 20, 39, 0.94);
+  --admin-bg-card: rgba(17, 29, 56, 0.78);
+  --admin-bg-card-solid: #111d38;
+  --admin-bg-card-hover: rgba(22, 38, 74, 0.88);
+  --admin-bg-surface-elevated: #162649;
+  --admin-bg-input: #090e1c;
+  --admin-bg-table-header: #0d172e;
+  --admin-bg-table-row-hover: rgba(0, 210, 255, 0.04);
+  
+  /* Electric Blue Tech Accents */
+  --admin-electric-blue: #00d2ff;
+  --admin-electric-blue-hover: #38bdf8;
+  --admin-electric-blue-muted: rgba(0, 210, 255, 0.12);
+  --admin-electric-blue-glow: 0 0 16px rgba(0, 210, 255, 0.35);
+  --admin-electric-gradient: linear-gradient(135deg, #0284c7 0%, #00d2ff 100%);
+  --admin-electric-gradient-hover: linear-gradient(135deg, #0369a1 0%, #38bdf8 100%);
+  --admin-cyan-accent: #06b6d4;
+
+  /* Status Tokens */
+  --admin-success: #10b981;
+  --admin-success-bg: rgba(16, 185, 129, 0.12);
+  --admin-success-border: rgba(16, 185, 129, 0.3);
+  
+  --admin-warning: #f59e0b;
+  --admin-warning-bg: rgba(245, 158, 11, 0.12);
+  --admin-warning-border: rgba(245, 158, 11, 0.3);
+  
+  --admin-danger: #f43f5e;
+  --admin-danger-bg: rgba(244, 63, 94, 0.12);
+  --admin-danger-border: rgba(244, 63, 94, 0.3);
+  
+  --admin-info: #38bdf8;
+  --admin-info-bg: rgba(56, 189, 248, 0.12);
+  --admin-info-border: rgba(56, 189, 248, 0.3);
+
+  --admin-purple: #8b5cf6;
+  --admin-purple-bg: rgba(139, 92, 246, 0.12);
+  --admin-purple-border: rgba(139, 92, 246, 0.3);
+
+  /* Typography Colors */
+  --admin-text-primary: #f8fafc;
+  --admin-text-secondary: #cbd5e1;
+  --admin-text-muted: #8294ae;
+  --admin-text-subtle: #51637d;
+
+  /* Borders & Dividers */
+  --admin-border-subtle: rgba(255, 255, 255, 0.08);
+  --admin-border-cyan: rgba(0, 210, 255, 0.22);
+  --admin-border-focus: #00d2ff;
+  --admin-border-strong: #1e2f52;
+
+  /* Shadows */
+  --admin-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --admin-shadow-md: 0 6px 20px rgba(0, 0, 0, 0.35);
+  --admin-shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.45);
+  --admin-shadow-card: 0 8px 24px -4px rgba(2, 6, 23, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --admin-shadow-electric: 0 4px 18px rgba(0, 210, 255, 0.28);
 }

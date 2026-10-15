@@ -11,7 +11,6 @@ function TopupPage() {
   const socket = useSocket();
   const { rechargeEnabled } = useConfig();
 
-  const [transferAmountOption, setTransferAmountOption] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
   const [message, setMessage] = useState(null);
   const [activeDeposit, setActiveDeposit] = useState(null);
@@ -700,7 +699,6 @@ function TopupPage() {
                               key={amt}
                               type="button"
                               onClick={() => {
-                                setTransferAmountOption(amt.toString());
                                 setTransferAmount(amt.toString());
                               }}
                               className={`btn ${transferAmount === amt.toString() ? 'btn-primary' : 'btn-outline'}`}
@@ -740,7 +738,6 @@ function TopupPage() {
                         value={transferAmount}
                         onChange={(e) => {
                           setTransferAmount(e.target.value);
-                          setTransferAmountOption('custom');
                         }}
                         className="topup-input"
                         style={{ color: '#000', background: '#fff', border: '1px solid #ccc' }}

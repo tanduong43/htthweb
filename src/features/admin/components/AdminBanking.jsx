@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import api from '../../../api/api';
 
@@ -21,7 +21,7 @@ export default function AdminBanking() {
   const [rechargeEnabled, setRechargeEnabled] = useState(true);
   const [updatingRechargeStatus, setUpdatingRechargeStatus] = useState(false);
 
-  const fetchConfig = async () => {
+  const fetchConfig = useCallback(async () => {
     try {
       const res = await api.get('banking/status');
       if (res.data && res.data.success) {
@@ -33,9 +33,9 @@ export default function AdminBanking() {
     } catch (e) {
       console.error('Error fetching config in AdminBanking:', e);
     }
-  };
+  }, []);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
       await fetchConfig();
@@ -51,11 +51,11 @@ export default function AdminBanking() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchConfig, showMessage]);
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [fetchOrders]);
 
   const handleToggleRecharge = async () => {
     const nextStatus = !rechargeEnabled;
@@ -182,19 +182,32 @@ export default function AdminBanking() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Header */}
-      <div className="glass-panel" style={{ padding: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+      <div className="glass-panel" style={{ padding: '22px 26px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
         <div>
-          <h2 style={{ color: '#ff3366', margin: 0, fontSize: '22px' }}>🏦 Quản Lý Đơn Nạp Banking</h2>
-          <p style={{ color: '#aaa', margin: '5px 0 0 0', fontSize: '14px' }}>
+          <h2 style={{
+            margin: 0,
+            fontSize: '22px',
+            fontWeight: 800,
+            background: 'linear-gradient(135deg, #f8fafc 0%, #38bdf8 50%, #00d2ff 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '0.4px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            <span>🏦</span> Quản Lý Đơn Nạp Banking
+          </h2>
+          <p style={{ color: '#8294ae', margin: '6px 0 0 0', fontSize: '13.5px' }}>
             Duyệt hoặc từ chối các đơn nạp tiền chuyển khoản ngân hàng.
             {pendingCount > 0 && (
-              <span style={{ color: '#faad14', fontWeight: 'bold', marginLeft: '8px' }}>
-                ({pendingCount} đơn đang chờ duyệt)
+              <span style={{ color: '#00d2ff', fontWeight: 'bold', marginLeft: '8px', background: 'rgba(0, 210, 255, 0.12)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(0, 210, 255, 0.3)' }}>
+                {pendingCount} đơn đang chờ duyệt
               </span>
             )}
           </p>
         </div>
-        <button onClick={fetchOrders} className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.15)', color: '#ccc', padding: '8px 16px', fontSize: '13px', background: 'transparent', cursor: 'pointer', borderRadius: '6px' }}>
+        <button onClick={fetchOrders} className="btn btn-outline" style={{ padding: '8px 16px', fontSize: '13px' }}>
           🔄 Tải lại
         </button>
       </div>

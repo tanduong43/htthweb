@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import api from '../../../api/api';
 
@@ -9,22 +9,20 @@ const styles = {
     gap: '24px',
     maxWidth: '1300px',
     margin: '0 auto',
-    padding: '20px',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    color: '#eee',
+    padding: '10px 0',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif',
+    color: '#e2e8f0',
   },
   title: {
-    color: '#ff3366',
     marginBottom: '24px',
     textAlign: 'center',
-    fontSize: '26px',
+    fontSize: '24px',
     fontWeight: '800',
     textTransform: 'uppercase',
-    letterSpacing: '1.5px',
-    background: 'linear-gradient(135deg, #ff3366 0%, #ff5e62 100%)',
+    letterSpacing: '1px',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #38bdf8 50%, #00d2ff 100%)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
-    textShadow: '0 2px 10px rgba(255, 51, 102, 0.15)',
   },
   layout: {
     display: 'flex',
@@ -40,18 +38,18 @@ const styles = {
     alignSelf: 'flex-start',
     maxHeight: 'calc(100vh - 120px)',
     overflowY: 'auto',
-    borderRadius: '16px',
+    borderRadius: '14px',
   },
   listCol: {
     flex: '2 1 650px',
     minWidth: '320px',
-    background: 'rgba(20, 20, 20, 0.75)',
+    background: 'rgba(17, 29, 56, 0.75)',
     backdropFilter: 'blur(12px)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '16px',
+    border: '1px solid rgba(0, 210, 255, 0.14)',
+    borderRadius: '14px',
     padding: '24px',
     alignSelf: 'flex-start',
-    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',
+    boxShadow: '0 8px 24px -4px rgba(2, 6, 23, 0.5)',
     maxHeight: 'calc(100vh - 120px)',
     display: 'flex',
     flexDirection: 'column',
@@ -66,22 +64,22 @@ const styles = {
   },
   form: {
     textAlign: 'left',
-    background: 'rgba(20, 20, 20, 0.75)',
+    background: 'rgba(17, 29, 56, 0.75)',
     backdropFilter: 'blur(12px)',
-    padding: '28px',
-    borderRadius: '16px',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    color: '#fff',
-    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',
+    padding: '26px',
+    borderRadius: '14px',
+    border: '1px solid rgba(0, 210, 255, 0.14)',
+    color: '#f8fafc',
+    boxShadow: '0 8px 24px -4px rgba(2, 6, 23, 0.5)',
   },
   formTitle: {
-    color: '#ff3366',
+    color: '#00d2ff',
     marginBottom: '20px',
-    fontSize: '19px',
+    fontSize: '18px',
     fontWeight: '700',
     borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
     paddingBottom: '12px',
-    letterSpacing: '0.5px'
+    letterSpacing: '0.4px'
   },
   formGroup: {
     marginBottom: '18px',
@@ -103,27 +101,27 @@ const styles = {
     marginBottom: '8px',
     fontWeight: '600',
     textAlign: 'left',
-    color: '#b3b3b3',
-    fontSize: '13.5px',
+    color: '#8294ae',
+    fontSize: '13px',
     letterSpacing: '0.3px',
   },
   input: {
     width: '100%',
     padding: '11px 14px',
     borderRadius: '8px',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
-    color: '#fff',
+    border: '1px solid #1e2f52',
+    backgroundColor: '#090e1c',
+    color: '#f8fafc',
     boxSizing: 'border-box',
-    fontSize: '14.5px',
+    fontSize: '14px',
     outline: 'none',
-    transition: 'all 0.25s ease',
+    transition: 'all 0.2s ease',
   },
   itemsContainer: {
     marginBottom: '18px',
     padding: '14px',
-    backgroundColor: 'rgba(0, 0, 0, 0.25)',
-    border: '1px solid rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(9, 14, 28, 0.6)',
+    border: '1px solid rgba(0, 210, 255, 0.12)',
     borderRadius: '10px'
   },
   itemRow: {
@@ -137,20 +135,20 @@ const styles = {
     width: '100%',
     padding: '10px',
     marginTop: '6px',
-    backgroundColor: 'transparent',
-    color: '#00e5ff',
-    border: '1px dashed rgba(0, 229, 255, 0.5)',
+    backgroundColor: 'rgba(0, 210, 255, 0.06)',
+    color: '#00d2ff',
+    border: '1px dashed rgba(0, 210, 255, 0.4)',
     borderRadius: '8px',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.25s ease',
+    transition: 'all 0.2s ease',
     outline: 'none',
   },
   btnRemove: {
     padding: '10px 14px',
-    backgroundColor: 'rgba(255, 77, 79, 0.15)',
-    color: '#ff4d4f',
-    border: '1px solid rgba(255, 77, 79, 0.3)',
+    backgroundColor: 'rgba(244, 63, 94, 0.12)',
+    color: '#f43f5e',
+    border: '1px solid rgba(244, 63, 94, 0.3)',
     borderRadius: '8px',
     fontWeight: 'bold',
     cursor: 'pointer',
@@ -158,22 +156,22 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     height: '39px',
-    transition: 'all 0.25s ease',
+    transition: 'all 0.2s ease',
   },
   btnSubmit: {
     width: '100%',
-    padding: '13px',
-    background: 'linear-gradient(135deg, #ff3366 0%, #ff5e62 100%)',
-    color: '#fff',
+    padding: '12px',
+    background: 'linear-gradient(135deg, #0284c7 0%, #00d2ff 100%)',
+    color: '#06101e',
     border: 'none',
     borderRadius: '8px',
     fontWeight: '700',
-    fontSize: '15.5px',
+    fontSize: '14.5px',
     cursor: 'pointer',
-    boxShadow: '0 4px 15px rgba(255, 51, 102, 0.3)',
-    transition: 'all 0.25s ease',
+    boxShadow: '0 4px 14px rgba(0, 210, 255, 0.3)',
+    transition: 'all 0.2s ease',
     marginTop: '12px',
-    letterSpacing: '0.5px'
+    letterSpacing: '0.4px'
   },
   btnCancel: {
     width: '100%',
@@ -257,7 +255,7 @@ function AdminGiftcode() {
   const [giftcodes, setGiftcodes] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchGiftcodes = async () => {
+  const fetchGiftcodes = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get('admin/giftcodes');
@@ -269,11 +267,11 @@ function AdminGiftcode() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showMessage]);
 
   useEffect(() => {
     fetchGiftcodes();
-  }, []);
+  }, [fetchGiftcodes]);
 
   const resetForm = () => {
     setEditId(null);
@@ -641,14 +639,15 @@ function AdminGiftcode() {
             <button 
               onClick={fetchGiftcodes} 
               style={{
-                background: 'transparent',
-                border: '1px solid #ff3366',
-                color: '#ff3366',
-                padding: '4px 10px',
-                borderRadius: '4px',
+                background: 'rgba(0, 210, 255, 0.08)',
+                border: '1px solid rgba(0, 210, 255, 0.4)',
+                color: '#00d2ff',
+                padding: '5px 12px',
+                borderRadius: '6px',
                 fontSize: '12px',
                 cursor: 'pointer',
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                transition: 'all 0.2s ease'
               }}
             >
               🔄 Tải lại

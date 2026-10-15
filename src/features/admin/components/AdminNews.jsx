@@ -150,24 +150,36 @@ function AdminNews() {
   };
 
   return (
-    <div className="admin-form" style={{ maxWidth: '1000px', margin: '0 auto', fontFamily: '"Times New Roman", Times, serif' }}>
-      <h3 style={{ color: '#ff3366', marginBottom: '20px', textAlign: 'center' }}>📰 QUẢN LÝ TIN TỨC</h3>
+    <div className="admin-form" style={{ maxWidth: '1100px', margin: '0 auto', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif', color: '#e2e8f0', padding: '10px 0' }}>
+      <h3 style={{
+        marginBottom: '24px',
+        textAlign: 'center',
+        fontSize: '24px',
+        fontWeight: '800',
+        textTransform: 'uppercase',
+        letterSpacing: '1px',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #38bdf8 50%, #00d2ff 100%)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+      }}>
+        📰 QUẢN LÝ TIN TỨC & BÀI VIẾT
+      </h3>
 
       {/* Editor / Form View */}
       {isEditing || currentId === null && title !== '' ? (
-        <div style={{ background: 'rgba(26, 26, 26, 0.6)', border: '1px solid #333', padding: '25px', borderRadius: '12px', marginBottom: '30px' }}>
-          <h4 style={{ color: '#ff3366', marginBottom: '20px', borderBottom: '1px solid #444', paddingBottom: '10px' }}>
+        <div style={{ background: 'rgba(17, 29, 56, 0.75)', backdropFilter: 'blur(12px)', border: '1px solid rgba(0, 210, 255, 0.14)', padding: '26px', borderRadius: '14px', marginBottom: '30px', boxShadow: '0 8px 24px -4px rgba(2, 6, 23, 0.5)' }}>
+          <h4 style={{ color: '#00d2ff', marginBottom: '20px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '12px', fontSize: '18px', fontWeight: '700' }}>
             {currentId ? '✏️ CHỈNH SỬA BÀI VIẾT' : '➕ THÊM BÀI VIẾT MỚI'}
           </h4>
           
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', color: '#ccc', marginBottom: '5px', fontSize: '14px', fontWeight: 'bold' }}>Tiêu đề:</label>
+              <label style={{ display: 'block', color: '#8294ae', marginBottom: '6px', fontSize: '13.5px', fontWeight: '600' }}>Tiêu đề:</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                style={{ width: '100%', padding: '10px', background: '#111', border: '1px solid #444', borderRadius: '6px', color: '#fff', outline: 'none' }}
+                style={{ width: '100%', padding: '11px 14px', background: '#090e1c', border: '1px solid #1e2f52', borderRadius: '8px', color: '#f8fafc', outline: 'none', boxSizing: 'border-box' }}
                 placeholder="Nhập tiêu đề tin tức..."
                 required
               />
@@ -269,14 +281,14 @@ function AdminNews() {
               <button
                 type="button"
                 onClick={resetForm}
-                style={{ padding: '10px 20px', background: '#444', border: 'none', borderRadius: '6px', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
+                style={{ padding: '10px 22px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '8px', color: '#cbd5e1', cursor: 'pointer', fontWeight: '600' }}
               >
                 Hủy bỏ
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                style={{ padding: '10px 20px', background: '#ff3366', border: 'none', borderRadius: '6px', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
+                style={{ padding: '10px 24px', background: 'linear-gradient(135deg, #0284c7 0%, #00d2ff 100%)', border: 'none', borderRadius: '8px', color: '#06101e', cursor: 'pointer', fontWeight: '700', boxShadow: '0 4px 14px rgba(0, 210, 255, 0.3)' }}
               >
                 {saving ? 'Đang lưu...' : 'Lưu bài viết'}
               </button>
@@ -290,7 +302,7 @@ function AdminNews() {
               resetForm();
               setTitle(' '); // Trigger form display mode
             }}
-            style={{ padding: '10px 20px', background: '#0088cc', border: 'none', borderRadius: '6px', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
+            style={{ padding: '10px 22px', background: 'linear-gradient(135deg, #0284c7 0%, #00d2ff 100%)', border: 'none', borderRadius: '8px', color: '#06101e', cursor: 'pointer', fontWeight: '700', boxShadow: '0 4px 14px rgba(0, 210, 255, 0.3)' }}
           >
             ➕ Thêm bài viết mới
           </button>
